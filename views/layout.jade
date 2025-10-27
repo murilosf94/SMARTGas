@@ -3,7 +3,7 @@ html(lang="pt-BR")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title ShopSmart - Sua loja Online
+    title SmartGas
     link(rel="stylesheet", href="/../stylesheets/style.css")
     link(rel="stylesheet", href="/../stylesheets/product.css")
     link(rel="stylesheet", href="/../stylesheets/form.css")
@@ -24,40 +24,40 @@ html(lang="pt-BR")
         .logo-container
           a.logo-link(href="/")
             .logo-icon S
-            .logo-text Shop<span class="logo-text-light">Smart</span>
+            .logo-text Smart<span class="logo-text-light">Gas</span>
 
         nav.main-nav
           a.nav-link(href="/") Home
-          a.nav-link(href="/nossosprodutos") Produtos
-          .dropdown
-            a.nav-link.dropdown-toggle(href="#") 
-              | Categorias 
-              span.dropdown-arrow ▼
-            .dropdown-menu
-              ul.submenu 
-                li
-                  a.dropdown-item(href="/") Roupas
-                li
-                  a.dropdown-item(href="/") Eletrônicos
-                li
-                  a.dropdown-item(href="/") Esportes
+          a.nav-link(href="/nossosprodutos") Produtos Conveniência
+          //- .dropdown
+          //-   a.nav-link.dropdown-toggle(href="#") 
+          //-     | Categorias 
+          //-     span.dropdown-arrow ▼
+          //-   .dropdown-menu
+          //-     ul.submenu 
+          //-       li
+          //-         a.dropdown-item(href="/") Roupas
+          //-       li
+          //-         a.dropdown-item(href="/") Eletrônicos
+          //-       li
+          //-         a.dropdown-item(href="/") Esportes
           
           // Links condicionais para usuário
           if session.usuario
-            a.nav-link(href="products/new") Anunciar
+            a.nav-link(href="products/new") Adicionar Produto
             
             if session.usuario.funcao === 'admin'
               a.nav-link(href="/dashboardadmin") Dashboard
 
-          .search-container
-            .search-icon
-              img(src="../images/icons/procurar.png", alt="Buscar")
-            input.search-input(type="text" placeholder="Buscar produtos...")        
+          //- .search-container
+          //-   .search-icon
+          //-     img(src="../images/icons/procurar.png", alt="Buscar")
+          //-   input.search-input(type="text" placeholder="Buscar produtos...")        
 
         .header-actions
-          a.action-btn(href="#" title="Favoritos")
-            span.action-icon
-              img(src="../images/icons/coracao.png", alt="Favoritos")
+          //- a.action-btn(href="#" title="Favoritos")
+          //-   span.action-icon
+          //-     img(src="../images/icons/coracao.png", alt="Favoritos")
 
           a.action-btn(href="#" title="Notificações")
             span.action-icon
@@ -82,22 +82,21 @@ html(lang="pt-BR")
     footer.footer
       .footer-content
         .footer-section
-          h3 ShopSmart
-          p.footer-description Sua experiência de compra é nossa prioridade. Encontre os melhores produtos com ofertas imperdíveis.
+          h3 SmartGas
+          p.footer-description Sua experiência de abastecimento é nossa prioridade.
 
-        .footer-section
-          h3 Categorias
-          ul
-            li: a(href="/") Moda
-            li: a(href="/") Eletrônicos
-            li: a(href="/") Esportes
+        //- .footer-section
+        //-   h3 Categorias
+        //-   ul
+        //-     li: a(href="/") Moda
+        //-     li: a(href="/") Eletrônicos
+        //-     li: a(href="/") Esportes
 
         .footer-section
           h3 Atendimento
           ul
             li: a(href="/contato") Contato
             li: a(href="#") FAQ
-            li: a(href="#") Trocas e Devoluções
             li: a(href="#") Política de Privacidade
 
         .footer-section
@@ -109,6 +108,6 @@ html(lang="pt-BR")
             li: a(href="#") YouTube
 
       .footer-bottom
-        p &copy; 2024 ShopSmart. Todos os direitos reservados.
+        p &copy; 2025 SmartGas. Todos os direitos reservados.
 
     script(src="/js/scripts.js")
