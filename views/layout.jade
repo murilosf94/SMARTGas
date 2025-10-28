@@ -16,19 +16,20 @@ html(lang="pt-BR")
             span 📞 (11) 9999-9999
             span.contact-email ✉️ contato@shopsmart.com
           .promo-info
-            span 🚚 Frete grátis acima de R$ 200
+            span 🚚 Um posto de confiança
             span.promo-secure 🔒 Compra 100% segura
 
       // Main Header
       .main-header
         .logo-container
           a.logo-link(href="/")
-            .logo-icon S
+            .logo-icon ⛽
             .logo-text Smart<span class="logo-text-light">Gas</span>
 
         nav.main-nav
           a.nav-link(href="/") Home
-          a.nav-link(href="/nossosprodutos") Produtos Conveniência
+          if session.usuario
+            a.nav-link(href="/nossosprodutos") Produtos Conveniência
           //- .dropdown
           //-   a.nav-link.dropdown-toggle(href="#") 
           //-     | Categorias 
@@ -59,10 +60,10 @@ html(lang="pt-BR")
           //-   span.action-icon
           //-     img(src="../images/icons/coracao.png", alt="Favoritos")
 
-          a.action-btn(href="#" title="Notificações")
-            span.action-icon
-              img(src="../images/icons/sino.png", alt="Notificacao")
-            .notification-dot
+          //- a.action-btn(href="#" title="Notificações")
+          //-   span.action-icon
+          //-     img(src="../images/icons/sino.png", alt="Notificacao")
+          //-   .notification-dot
           
           if session.usuario
             a.action-btn(href="/carrinho/#{session.usuario.id}" title="Carrinho")

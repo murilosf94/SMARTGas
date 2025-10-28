@@ -9,9 +9,10 @@ block content
         h1 Bem-vindo à SmartGas!
         p.hero-subtitle Sua experiência de abastecimento é nossa prioridade!
         p.hero-description Descubra uma seleção incrível de produtos, desde moda até eletrônicos, com ofertas imperdíveis.
-        a.cta-button(href="/nossosprodutos")
-          | Registrar venda
-          span.cta-arrow →
+        if session.usuario
+          a.cta-button(href="/nossosprodutos")
+            | Registrar venda
+            span.cta-arrow →
       .hero-img.intense-glow
       
   //- // Features Section
