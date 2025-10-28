@@ -1,0 +1,114 @@
+doctype html
+html(lang="pt-BR")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title SmartGas
+    link(rel="stylesheet", href="/../stylesheets/style.css")
+    link(rel="stylesheet", href="/../stylesheets/product.css")
+    link(rel="stylesheet", href="/../stylesheets/form.css")
+  body
+    header.header
+      // Top Bar
+      .top-bar
+        .top-bar-content
+          .contact-info
+            span 📞 (11) 9999-9999
+            span.contact-email ✉️ contato@shopsmart.com
+          .promo-info
+            span 🚚 Um posto de confiança
+            span.promo-secure 🔒 Compra 100% segura
+
+      // Main Header
+      .main-header
+        .logo-container
+          a.logo-link(href="/")
+            .logo-icon ⛽
+            .logo-text Smart<span class="logo-text-light">Gas</span>
+
+        nav.main-nav
+          a.nav-link(href="/") Home
+          if session.usuario
+            a.nav-link(href="/nossosprodutos") Produtos Conveniência
+          //- .dropdown
+          //-   a.nav-link.dropdown-toggle(href="#") 
+          //-     | Categorias 
+          //-     span.dropdown-arrow ▼
+          //-   .dropdown-menu
+          //-     ul.submenu 
+          //-       li
+          //-         a.dropdown-item(href="/") Roupas
+          //-       li
+          //-         a.dropdown-item(href="/") Eletrônicos
+          //-       li
+          //-         a.dropdown-item(href="/") Esportes
+          
+          // Links condicionais para usuário
+          if session.usuario
+            a.nav-link(href="products/new") Adicionar Produto
+            
+            if session.usuario.funcao === 'admin'
+              a.nav-link(href="/dashboardadmin") Dashboard
+
+          //- .search-container
+          //-   .search-icon
+          //-     img(src="../images/icons/procurar.png", alt="Buscar")
+          //-   input.search-input(type="text" placeholder="Buscar produtos...")        
+
+        .header-actions
+          //- a.action-btn(href="#" title="Favoritos")
+          //-   span.action-icon
+          //-     img(src="../images/icons/coracao.png", alt="Favoritos")
+
+          //- a.action-btn(href="#" title="Notificações")
+          //-   span.action-icon
+          //-     img(src="../images/icons/sino.png", alt="Notificacao")
+          //-   .notification-dot
+          
+          if session.usuario
+            a.action-btn(href="/carrinho/#{session.usuario.id}" title="Carrinho")
+              span.action-icon
+                img(src="../images/icons/carrinho-de-compras.png", alt="Carrinho")
+
+          if !session.usuario
+            a.login-btn(href="/login") Login
+            a.login-btn(href="/register") Registrar
+          else
+            span.branco Olá, #{session.usuario.usuario}!
+            a.login-btn(href="/logout") Sair
+
+    main
+      block content
+
+    footer.footer
+      .footer-content
+        .footer-section
+          h3 SmartGas
+          p.footer-description Sua experiência de abastecimento é nossa prioridade.
+
+        //- .footer-section
+        //-   h3 Categorias
+        //-   ul
+        //-     li: a(href="/") Moda
+        //-     li: a(href="/") Eletrônicos
+        //-     li: a(href="/") Esportes
+
+        .footer-section
+          h3 Atendimento
+          ul
+            li: a(href="/contato") Contato
+            li: a(href="#") FAQ
+            li: a(href="#") Política de Privacidade
+
+        .footer-section
+          h3 Conecte-se
+          ul
+            li: a(href="#") Facebook
+            li: a(href="#") Instagram
+            li: a(href="#") Twitter
+            li: a(href="#") YouTube
+
+      .footer-bottom
+        p &copy; 2025 SmartGas. Todos os direitos reservados.
+
+    script(src="/js/scripts.js")
