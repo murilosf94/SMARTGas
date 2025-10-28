@@ -5,6 +5,7 @@ var cookieParser     = require('cookie-parser');
 var logger           = require('morgan');
 var session          = require('express-session');
 var methodOverride   = require('method-override');
+const adminApiRouter = require('./routes/adminapi');
 
 // Conexão com pool MySQL via db.js
 const pool           = require('./db');
@@ -23,9 +24,9 @@ var anunciarRouter   = require('./routes/anunciar');
 var dashboardadminRouter = require('./routes/dashboardadmin');
 var meuperfilRouter  = require('./routes/perfil');
 const authRoutes     = require('./routes/authroute');
+const caixaRouter    = require('./routes/caixa');
 const { estaLogado, eAdmin } = require('./middleware/authmiddleware');
 var productsRouter   = require('./routes/products');  // CRUD de produtos
-
 var app = express();
 
 //Css set
@@ -91,7 +92,8 @@ app.use('/carrinho', estaLogado, carrinhoRouter);
 app.use('/pedidos', estaLogado, pedidosRouter);
 app.use('/anunciar', estaLogado, anunciarRouter);
 app.use('/perfil', estaLogado, meuperfilRouter);
-
+app.use('/api/admin', estaLogado, adminApiRouter);
+app.use('/caixa', estaLogado, caixaRouter);
 // Rota admin
 app.get('/admin', estaLogado, eAdmin, (req, res) => {
   res.render('admin', { usuario: req.session.usuario });
