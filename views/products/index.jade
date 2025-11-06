@@ -1,24 +1,65 @@
 extends ../layout
 
 block content
-  h2 Lista de Produtos
-  table
-    thead
-      tr
-        th Nome
-        th Preço
-        th Imagem
-        th Estoque
-        th Ações
-    tbody
-      each p in products
-        tr
-          td= p.name
-          td R$ #{p.price}
-          td
-            if p.imageUrl
-              img(src=p.imageUrl, width="80") 
+  .container
+    //- Bloco 1: Hero
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Nossos Produtos
+          p.hero-description Gerencie o catálogo de produtos e estoque.
+
+    //- Bloco 2: O Card da Tabela
+    .form-section
+      .container
+        .form-card
+          
+          //- Header do Card: Título na esquerda, Botão na direita
+          .form-header.flex-header
+            h2 Lista de Produtos
+            //- (Confirme se sua rota de 'novo' é /products/new ou /anunciar)
+            a.btn-primary(href="/products/new") 
+              span + 
+              | Novo Produto
+
+          //- Conteúdo do Card (a tabela ou a mensagem de "vazio")
+          .card-content
+            
+            //- Verifica se a lista 'products' tem algo
+            if products && products.length > 0
+              
+              //- Se SIM: Mostra a tabela
+              table.product-table
+                thead
+                  tr
+                    th Imagem
+                    th Nome
+                    th Preço
+                    th.th-fidelidade Estoque
+                    th.th-actions Ações
+                tbody
+                  each p in products
+                    tr
+                      //- Célula da Imagem
+                      td.td-image(data-label="Imagem")
+                        if p.imageUrl
+                          img(src=p.imageUrl, width="60", alt=p.name) 
+                        else
+                          .img-placeholder (sem)
+
+                      td(data-label="Nome")= p.name
+                      td.price-cell(data-label="Preço") R$ #{parseFloat(p.price).toFixed(2)}
+                      //- CORREÇÃO: Seu código original mostrava p.name aqui
+                      td.fidelidade-points(data-label="Estoque")= p.stock 
+                      
+                      //- Célula de ações
+                      td.actions
+                        a.btn.btn-edit(href='/products/' + p.id + '/edit') Editar
+                        form.form-delete(method="POST", action='/products/' + p.id + '/delete')
+                          button.btn.btn-delete(type="submit") Deletar
+            
             else
-              | (sem imagem)
-          td= p.name
-          td= p.stock
+              .empty-state
+                h3 Nenhum Produto Cadastrado
+                p Comece a adicionar produtos clicando no botão "+ Novo Produto".

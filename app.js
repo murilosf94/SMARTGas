@@ -22,7 +22,11 @@ var pedidosRouter    = require('./routes/pedidos');
 var anunciarRouter   = require('./routes/anunciar');
 var dashboardadminRouter = require('./routes/dashboardadmin');
 var meuperfilRouter  = require('./routes/perfil');
+var clientesRouter = require('./routes/clientesRoutes');
+var fornecedoresRouter = require('./routes/fornecedoresRoutes');
+var despesasRouter  = require('./routes/despesas');
 const authRoutes     = require('./routes/authroute');
+var adminUsuariosRouter = require('./routes/adminUsuariosRoutes');
 const { estaLogado, eAdmin } = require('./middleware/authmiddleware');
 var productsRouter   = require('./routes/products');  // CRUD de produtos
 
@@ -91,12 +95,17 @@ app.use('/carrinho', estaLogado, carrinhoRouter);
 app.use('/pedidos', estaLogado, pedidosRouter);
 app.use('/anunciar', estaLogado, anunciarRouter);
 app.use('/perfil', estaLogado, meuperfilRouter);
+app.use('/despesas', estaLogado, despesasRouter);
+app.use('/fornecedores', estaLogado, fornecedoresRouter);
+app.use('/clientes', estaLogado, clientesRouter);
 
 // Rota admin
 app.get('/admin', estaLogado, eAdmin, (req, res) => {
   res.render('admin', { usuario: req.session.usuario });
 });
 app.use('/dashboardadmin', estaLogado, eAdmin, dashboardadminRouter);
+
+app.use('/admin-usuarios', estaLogado, eAdmin, adminUsuariosRouter);
 
 // Exemplo de consulta direta usando pool
 app.get('/select', estaLogado, async (req, res) => {

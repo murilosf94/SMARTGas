@@ -735,3 +735,159 @@ body {
     text-align: center;
   }
 }
+
+
+/* ============================================= */
+/* CSS PARA A LISTA DE CLIENTES (E OUTRAS LISTAS) */
+/* ============================================= */
+
+/* 1. Faz o header do card (título e botão) ficar alinhado */
+.flex-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* 2. Garante que o botão "+ Novo Cliente" tenha o ícone alinhado */
+.flex-header .btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espaço entre o '+' e o texto */
+}
+.flex-header .btn-primary span {
+  font-size: 1.2rem; /* Deixa o '+' um pouco maior */
+}
+
+/* 3. Estilos para o conteúdo dentro do card */
+.card-content {
+  padding: 20px; /* Adiciona um respiro interno */
+}
+
+/* 4. Estilo da Tabela (assumindo que .product-table já exista) */
+.product-table {
+  width: 100%;
+  border-collapse: collapse; /* Remove linhas duplas */
+  margin-top: 20px;
+  table-layout: fixed; /* <-- ADICIONADO: Força a tabela a obedecer a largura */
+}
+
+.product-table th,
+.product-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #444; /* Linha de separação (para tema escuro) */
+  
+  /* --- ADICIONADO: Regras para quebrar palavras longas --- */
+  overflow-wrap: break-word;
+  word-wrap: break-word;    
+  word-break: break-word;
+  /* --- Fim da adição --- */
+}
+
+.product-table th {
+  background-color: #333; /* Fundo do cabeçalho (para tema escuro) */
+  font-weight: 600;
+}
+
+/* Alinhamento dos cabeçalhos de pontos e ações */
+.product-table .th-fidelidade,
+.product-table .th-actions {
+  text-align: center;
+  /* <-- ADICIONADO: (Opcional) Define uma largura fixa para a coluna de ações */
+  width: 150px; 
+}
+
+/* 5. Estilo dos Pontos de Fidelidade na Tabela */
+.fidelidade-points {
+  font-weight: bold;
+  color: #4CAF50; /* Um verde para destacar */
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+/* 6. Estilo dos Botões de Ação na Tabela */
+.product-table td.actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; /* Espaço entre os botões */
+  text-align: center;
+}
+
+/* Estilo base para os botões de ação */
+.btn.btn-edit,
+.btn.btn-delete {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+  color: #fff;
+}
+
+.btn.btn-edit {
+  background-color: #ffc107; /* Amarelo (Editar) */
+  color: #333;
+}
+
+.btn.btn-delete {
+  background-color: #dc3545; /* Vermelho (Deletar) */
+}
+
+/* O form de "deletar" não deve quebrar linha */
+.form-delete {
+  margin: 0;
+  padding: 0;
+}
+
+/* 7. Estilo da Mensagem de "Lista Vazia" */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  border: 2px dashed #444;
+  border-radius: 8px;
+}
+.empty-state h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+
+/* Estiliza o "botão" de expandir a troca de imagem */
+.file-details summary.file-summary {
+  list-style: none; /* Remove a seta padrão */
+  cursor: pointer;
+  padding: 10px;
+  background-color: #333; /* Cor escura (ajuste para o seu tema) */
+  border-radius: 5px;
+  font-weight: bold;
+  color: #eee;
+  transition: background-color 0.2s;
+}
+
+.file-details summary.file-summary:hover {
+  background-color: #444;
+}
+
+/* Adiciona um 'triângulo' (caret) customizado */
+.file-details summary.file-summary::before {
+  content: '►'; /* Ícone de "fechado" */
+  margin-right: 10px;
+  font-size: 0.8em;
+}
+
+/* Muda o ícone quando o 'details' está aberto */
+.file-details[open] > summary.file-summary::before {
+  content: '▼'; /* Ícone de "aberto" */
+}
+
+/* Onde o input de arquivo fica */
+.file-details .file-upload-wrapper {
+  padding: 15px;
+  border: 1px solid #444;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+}

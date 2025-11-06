@@ -1,0 +1,45 @@
+extends ../layout
+
+block content
+  .container
+    //- Bloco 1: Hero
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Gerenciar Usuários
+          p.hero-description Altere as permissões de acesso dos usuários do sistema.
+
+    //- Bloco 2: O Card da Tabela
+    .form-section
+      .container
+        .form-card
+          
+          .form-header
+            h2 Usuários Cadastrados
+
+          .card-content
+            if usuarios && usuarios.length > 0
+              table.product-table
+                thead
+                  tr
+                    th Usuário
+                    th.th-fidelidade Função Atual
+                    th.th-actions Ações
+                tbody
+                  //- Loop 'each'
+                  each u in usuarios
+                    tr
+                      //- Mostra o 'u.usuario'
+                      td(data-label="Usuário")= u.usuario
+                      
+                      //- Mostra o 'u.funcao'
+                      td.fidelidade-points(data-label="Função")= u.funcao
+                      
+                      td.actions
+                        //- Link para a edição
+                        a.btn.btn-edit(href='/admin-usuarios/' + u.id + '/edit') Mudar Função
+            
+            else
+              .empty-state
+                h3 Nenhum outro usuário encontrado.

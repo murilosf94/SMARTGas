@@ -1,0 +1,44 @@
+extends ../layout
+
+block content
+  //- TUDO daqui para baixo deve estar indentado
+  .container
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          //- 1. Título alterado
+          h1 Editar Despesa
+          p.hero-description Atualize os detalhes desta despesa
+
+    .form-section
+      .container
+        .form-card
+          .form-header
+            h2 Informações da Despesa
+          
+          //- 2. ACTION alterado para a rota de UPDATE (usando o 'despesa.id')
+          form.product-form(method="POST", action='/despesas/' + despesa.id)
+            
+            .form-group
+              label.form-label Nome da Despesa
+              //- 3. VALUE preenchido com os dados atuais
+              input.form-input(type="text", name="name", required, value=despesa.name)
+            
+            .form-group
+              label.form-label Descrição
+              //- 3. VALUE (para textarea, o valor vem DEPOIS)
+              textarea.form-textarea(name="description", rows="4")= despesa.description
+            
+            .form-group
+              label.form-label Valor (R$)
+              //- 3. VALUE preenchido com os dados atuais
+              input.form-input(type="number", step="0.01", name="price", required, value=despesa.price)
+
+            .form-actions
+              a.btn-cancel(href="/despesas") Cancelar
+              
+              //- Texto do botão alterado
+              button.btn-primary(type="submit") 
+                | Salvar Alterações
+                span.btn-arrow →

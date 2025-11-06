@@ -1,0 +1,47 @@
+extends ../layout
+
+block content
+  .container
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Editar Fornecedor
+          p.hero-description Atualize os dados do fornecedor
+
+    .form-section
+      .container
+        .form-card
+          .form-header
+            h2 Informações do Fornecedor
+          
+          //- Action do formulário aponta para a rota de UPDATE
+          form.product-form(method="POST", action=`/fornecedores/${fornecedor.id}`)
+            
+            .form-group
+              label.form-label Nome do Fornecedor
+              input.form-input(type="text", name="name", value=fornecedor.name, required)
+
+            .form-group
+              label.form-label Contato (Telefone ou E-mail)
+              input.form-input(type="text", name="contato", value=fornecedor.contato, required)
+
+            .form-group
+              label.form-label CNPJ
+              input.form-input(type="text", name="cnpj", value=fornecedor.cnpj, required)
+            
+            .form-group
+              label.form-label Serviço/Produto Fornecido
+              input.form-input(type="text", name="servico", value=fornecedor.servico, required)
+
+            .form-group
+              label.form-label Descrição (Opcional)
+              //- Textarea precisa do valor entre as tags
+              textarea.form-textarea(name="description", rows="4")= fornecedor.description
+            
+            .form-actions
+              a.btn-cancel(href="/fornecedores") Cancelar
+              
+              button.btn-primary(type="submit") 
+                | Salvar Alterações
+                span.btn-arrow →

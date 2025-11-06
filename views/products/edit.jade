@@ -15,7 +15,8 @@ block content
               .form-subtitle Atualize os dados do produto abaixo
             
             .form-content
-              form.product-form(method='POST', action=`/products/${product.id}?_method=PUT`, enctype="multipart/form-data")
+              //- CORREÇÃO: 'action' corrigido para sintaxe Jade
+              form.product-form(method='POST', action='/products/' + product.id + '?_method=PUT', enctype="multipart/form-data")
                 input(type="hidden", name="currentImageUrl", value=product.imageUrl)
                 
                 .form-grid
@@ -37,14 +38,25 @@ block content
                     label.form-label(for="stock") Estoque
                     input.form-input(type='number', name='stock', id="stock", value=product.stock, placeholder="Quantidade disponível")
                   
+                  //- --- INÍCIO DA MELHORIA DE UX ---
                   .form-group.full-width
-                    label.form-label(for="image") Nova Imagem (opcional)
-                    .file-upload-wrapper
+                  //- Usamos a tag <details> para esconder o campo opcional
+                  details.file-details
+                    //- Este é o "título" que o usuário clica
+                    summary.file-summary
+                      span 📷
+                      | Trocar a imagem do produto
+                    
+                    //- Este é o conteúdo que aparece ao clicar
+                    .file-upload-wrapper(style="margin-top: 15px;")
+                      label.form-label(for="image") Selecione o novo arquivo:
                       input.file-input(type="file", name="image", id="image", accept="image/*")
                       label.file-label(for="image")
                         span.file-icon 📁
-                        span.file-text Escolher arquivo
-                      .file-hint Formatos aceitos: JPG, PNG, GIF (máx. 5MB)
+                        span.file-text Escolher novo arquivo...
+                      .file-hint(style="color: #999; margin-top: 8px;")
+                        | Se nenhum arquivo for escolhido, a imagem atual será mantida.
+                  //- --- FIM DA MELHORIA DE UX ---
                 
                 .form-actions
                   button.btn-cancel(type="button", onclick="history.back()")
@@ -70,7 +82,7 @@ block content
                 
                 .preview-content
                   h4.preview-title= product.name
-                  .preview-price R$ #{product.price}
+                  .preview-price R$ #{parseFloat(product.price).toFixed(2)}
                   .preview-stock
                     span.stock-label Estoque: 
                     span.stock-value= product.stock
@@ -80,7 +92,8 @@ block content
               h3 Ações Rápidas
             .sidebar-content
               .category-list
-                a.category-item(href=`/products/${product.id}`)
+                //- CORREÇÃO: 'href' corrigido para sintaxe Jade
+                a.category-item(href='/products/' + product.id)
                   span.category-icon 👁️
                   span Ver Produto
                 a.category-item(href="/products")

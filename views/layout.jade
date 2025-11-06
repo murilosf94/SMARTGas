@@ -29,7 +29,10 @@ html(lang="pt-BR")
         nav.main-nav
           a.nav-link(href="/") Home
           if session.usuario
-            a.nav-link(href="/nossosprodutos") Produtos Conveniência
+            if session.usuario.funcao === 'admin'
+              a.nav-link(href="/admin-usuarios") Usuários
+            else
+              a.nav-link(href="/nossosprodutos") Produtos Conveniência
           //- .dropdown
           //-   a.nav-link.dropdown-toggle(href="#") 
           //-     | Categorias 
@@ -43,12 +46,17 @@ html(lang="pt-BR")
           //-       li
           //-         a.dropdown-item(href="/") Esportes
           
+          
+
           // Links condicionais para usuário
           if session.usuario
             a.nav-link(href="products/new") Adicionar Produto
             
             if session.usuario.funcao === 'admin'
               a.nav-link(href="/dashboardadmin") Dashboard
+              a.nav-link(href="/despesas") Despesas
+              a.nav-link(href="/fornecedores") Fornecedores
+              a.nav-link(href="/clientes") Clientes
 
           //- .search-container
           //-   .search-icon

@@ -1,0 +1,59 @@
+extends ../layout
+
+block content
+  .container
+    //- Bloco 1: Hero (igual ao seu formulário, para consistência)
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Nossos Clientes
+          p.hero-description Gerencie sua base de clientes e programas de fidelidade.
+
+    //- Bloco 2: O Card da Tabela
+    .form-section
+      .container
+        .form-card
+          
+          //- Header do Card: Título na esquerda, Botão na direita
+          .form-header.flex-header
+            h2 Lista de Clientes
+            a.btn-primary(href="/clientes/new") 
+              span + 
+              | Novo Cliente
+
+          //- Conteúdo do Card (a tabela ou a mensagem de "vazio")
+          .card-content
+            
+            //- Verificamos se a lista 'clientes' tem algo
+            if clientes && clientes.length > 0
+              
+              //- Se SIM: Mostra a tabela
+              table.product-table
+                thead
+                  tr
+                    th Nome
+                    th Contato
+                    th CPF
+                    th.th-fidelidade Fidelidade
+                    th.th-actions Ações
+                tbody
+                  each c in clientes
+                    tr
+                      //- Atributos data-label são bons para responsividade
+                      td(data-label="Nome")= c.name
+                      td(data-label="Contato")= c.contato
+                      td(data-label="CPF")= c.cpf
+                      td.fidelidade-points(data-label="Fidelidade")= c.fidelidade
+                      
+                      //- Célula de ações com botões
+                      td.actions
+                        a.btn.btn-edit(href='/clientes/' + c.id + '/edit') Editar
+                        //- O form agora tem uma classe para facilitar
+                        form.form-delete(method="POST", action='/clientes/' + c.id + '/delete')
+                          button.btn.btn-delete(type="submit") Deletar
+            
+            else
+              .empty-state
+                h3 Nenhum Cliente Cadastrado
+                p Comece a adicionar clientes clicando no botão "+ Novo Cliente".

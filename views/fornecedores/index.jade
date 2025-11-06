@@ -1,0 +1,55 @@
+extends ../layout
+
+block content
+  .container
+    //- Bloco 1: Hero
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Nossos Fornecedores
+          p.hero-description Gerencie sua rede de fornecedores e serviços.
+
+    //- Bloco 2: O Card da Tabela
+    .form-section
+      .container
+        .form-card
+          
+          //- Header do Card: Título na esquerda, Botão na direita
+          .form-header.flex-header
+            h2 Lista de Fornecedores
+            a.btn-primary(href="/fornecedores/new") 
+              span + 
+              | Novo Fornecedor
+
+          //- Conteúdo do Card (a tabela ou a mensagem de "vazio")
+          .card-content
+            
+            //- Verifica se a lista 'fornecedores' tem algo
+            if fornecedores && fornecedores.length > 0
+              
+              //- Se SIM: Mostra a tabela
+              table.product-table
+                thead
+                  tr
+                    th Nome
+                    th Contato
+                    th CNPJ
+                    th Serviço
+                    th.th-actions Ações
+                tbody
+                  each f in fornecedores
+                    tr
+                      td(data-label="Nome")= f.name
+                      td(data-label="Contato")= f.contato
+                      td(data-label="CNPJ")= f.cnpj
+                      td(data-label="Serviço")= f.servico
+                      
+                      td.actions
+                        a.btn.btn-edit(href='/fornecedores/' + f.id + '/edit') Editar
+                        form.form-delete(method="POST", action='/fornecedores/' + f.id + '/delete')
+                          button.btn.btn-delete(type="submit") Deletar
+            else
+              .empty-state
+                h3 Nenhum Fornecedor Cadastrado
+                p Comece a adicionar fornecedores clicando no botão "+ Novo Fornecedor".

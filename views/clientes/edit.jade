@@ -1,0 +1,48 @@
+extends ../layout
+
+block content
+  .container
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Editar Cliente
+          p.hero-description Atualize os dados e os pontos de fidelidade
+
+    .form-section
+      .container
+        .form-card
+          .form-header
+            h2 Informações do Cliente
+          
+          //- Action do formulário aponta para a rota de UPDATE
+          form.product-form(method="POST", action='/clientes/' + cliente.id)
+            
+            .form-group
+              label.form-label Nome do Cliente
+              input.form-input(type="text", name="name", value=cliente.name, required)
+
+            .form-group
+              label.form-label Contato (Telefone ou E-mail)
+              input.form-input(type="text", name="contato", value=cliente.contato, required)
+
+            .form-group
+              label.form-label CPF
+              input.form-input(type="text", name="cpf", value=cliente.cpf, required)
+              
+            //- *** AQUI ESTÁ O CAMPO QUE VOCÊ PEDIU ***
+            .form-group
+              label.form-label Pontos de Fidelidade
+              //- Aqui você pode aumentar ou diminuir os pontos
+              input.form-input(type="number", name="fidelidade", value=cliente.fidelidade, required)
+
+            .form-group
+              label.form-label Observações (Opcional)
+              textarea.form-textarea(name="description", rows="4")= cliente.description
+            
+            .form-actions
+              a.btn-cancel(href="/clientes") Cancelar
+              
+              button.btn-primary(type="submit") 
+                | Salvar Alterações
+                span.btn-arrow →

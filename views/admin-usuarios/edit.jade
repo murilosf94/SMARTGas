@@ -1,0 +1,36 @@
+extends ../layout
+
+block content
+  .container
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Mudar Função de Usuário
+          p.hero-description Selecione a nova permissão para este usuário.
+
+    .form-section
+      .container
+        .form-card
+          .form-header
+            //- Mostra o 'usuario.usuario'
+            h2 #{usuario.usuario}
+          
+          form.product-form(method="POST", action='/admin-usuarios/' + usuario.id)
+            
+            .form-group
+              label.form-label Nova Função
+              //- O 'select' agora tem o name="funcao"
+              select.form-input(name="funcao")
+                
+                //- Verifica 'usuario.funcao' para marcar o 'selected'
+                option(value="cliente", selected=(usuario.funcao === 'cliente')) Cliente
+                option(value="caixa", selected=(usuario.funcao === 'caixa')) Caixa
+                option(value="admin", selected=(usuario.funcao === 'admin')) Admin
+
+            .form-actions
+              a.btn-cancel(href="/admin-usuarios") Cancelar
+              
+              button.btn-primary(type="submit") 
+                | Salvar Alterações
+                span.btn-arrow →

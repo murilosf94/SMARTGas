@@ -1,0 +1,45 @@
+extends ../layout
+
+block content
+  .container
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Novo Fornecedor
+          p.hero-description Cadastre um novo fornecedor
+
+    .form-section
+      .container
+        .form-card
+          .form-header
+            h2 Informações do Fornecedor
+          
+          form.product-form(method="POST", action="/fornecedores")
+            
+            .form-group
+              label.form-label Nome do Fornecedor
+              input.form-input(type="text", name="name", placeholder="Ex: Gráfica Rápida", required)
+
+            .form-group
+              label.form-label Contato (Telefone ou E-mail)
+              input.form-input(type="text", name="contato", placeholder="(11) 99999-9999", required)
+
+            .form-group
+              label.form-label CNPJ
+              input.form-input(type="text", name="cnpj", placeholder="00.000.000/0001-00", required)
+            
+            .form-group
+              label.form-label Serviço/Produto Fornecido
+              input.form-input(type="text", name="servico", placeholder="Ex: Impressão de Banners", required)
+
+            .form-group
+              label.form-label Descrição (Opcional)
+              textarea.form-textarea(name="description", placeholder="Detalhes adicionais sobre o fornecedor", rows="4")
+            
+            .form-actions
+              a.btn-cancel(href="/fornecedores") Cancelar
+              
+              button.btn-primary(type="submit") 
+                | Criar Fornecedor
+                span.btn-arrow →

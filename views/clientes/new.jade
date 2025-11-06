@@ -1,0 +1,41 @@
+extends ../layout
+
+block content
+  .container
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Novo Cliente
+          p.hero-description Cadastre um novo cliente
+
+    .form-section
+      .container
+        .form-card
+          .form-header
+            h2 Informações do Cliente
+          
+          form.product-form(method="POST", action="/clientes")
+            
+            .form-group
+              label.form-label Nome do Cliente
+              input.form-input(type="text", name="name", placeholder="Nome completo", required)
+
+            .form-group
+              label.form-label Contato (Telefone ou E-mail)
+              input.form-input(type="text", name="contato", placeholder="(11) 99999-9999", required)
+
+            .form-group
+              label.form-label CPF
+              input.form-input(type="text", name="cpf", placeholder="000.000.000-00", required)
+            
+            .form-group
+              label.form-label Observações (Opcional)
+              textarea.form-textarea(name="description", placeholder="Detalhes adicionais sobre o cliente", rows="4")
+            
+            .form-actions
+              a.btn-cancel(href="/clientes") Cancelar
+              
+              button.btn-primary(type="submit") 
+                | Criar Cliente
+                span.btn-arrow →

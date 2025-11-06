@@ -1,0 +1,55 @@
+extends ../layout
+
+block content
+  .container
+    //- Bloco 1: Hero
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Controle de Despesas
+          p.hero-description Gerencie suas contas e despesas operacionais.
+
+    //- Bloco 2: O Card da Tabela
+    .form-section
+      .container
+        .form-card
+          
+          //- Header do Card: Título na esquerda, Botão na direita
+          .form-header.flex-header
+            h2 Lista de Despesas
+            a.btn-primary(href="/despesas/new") 
+              span + 
+              | Nova Despesa
+
+          //- Conteúdo do Card (a tabela ou a mensagem de "vazio")
+          .card-content
+            
+            //- Verifica se a lista 'despesas' tem algo
+            if despesas && despesas.length > 0
+              
+              //- Se SIM: Mostra a tabela
+              table.product-table
+                thead
+                  tr
+                    th Nome
+                    th Descrição
+                    th.th-fidelidade Preço
+                    th.th-actions Ações
+                tbody
+                  each d in despesas
+                    tr
+                      td(data-label="Nome")= d.name
+                      td(data-label="Descrição")= d.description
+                      td.price-cell(data-label="Preço") R$ #{parseFloat(d.price).toFixed(2)}
+                      
+                      //- Célula de ações (usando sintaxe de concatenação do Jade)
+                      td.actions
+                        a.btn.btn-edit(href='/despesas/' + d.id + '/edit') Editar
+                        form.form-delete(method="POST", action='/despesas/' + d.id + '/delete')
+                          button.btn.btn-delete(type="submit") Deletar
+            
+            else
+              .empty-state
+                h3 Nenhuma Despesa Cadastrada
+                p Comece a adicionar despesas clicando no botão "+ Nova Despesa".
