@@ -64,3 +64,29 @@ CREATE TABLE clientes (
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
   updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+
+
+CREATE TABLE vendas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  
+  -- Quem fez a venda (o frentista/caixa logado)
+  frentista_id INT, 
+  
+  -- Quem comprou (o dono do carrinho)
+  cliente_id INT,
+  
+  -- O que foi vendido
+  produto_id INT,
+  
+  -- Por quanto foi vendido
+  valor_venda DECIMAL(10, 2) NOT NULL,
+  
+  -- Quando foi vendido
+  data_venda TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  -- As "pontes" (Chaves Estrangeiras)
+  FOREIGN KEY (frentista_id) REFERENCES usuarios(id),
+  FOREIGN KEY (cliente_id) REFERENCES usuarios(id),
+  FOREIGN KEY (produto_id) REFERENCES products(id)
+);

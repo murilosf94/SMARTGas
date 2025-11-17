@@ -25,6 +25,8 @@ block content
                   tr
                     th Usuário
                     th.th-fidelidade Função Atual
+                    //- [COLUNA DE VENDAS ADICIONADA]
+                    th.th-fidelidade Vendas
                     th.th-actions Ações
                 tbody
                   //- Loop 'each'
@@ -35,6 +37,10 @@ block content
                       
                       //- Mostra o 'u.funcao'
                       td.fidelidade-points(data-label="Função")= u.funcao
+                      
+                      //- [CÉLULA DE VENDAS ADICIONADA]
+                      //- Mostra o 'u.total_vendas' (que vem do controller)
+                      td.fidelidade-points(data-label="Vendas")= u.total_vendas
                       
                       td.actions
                         //- Link para a edição

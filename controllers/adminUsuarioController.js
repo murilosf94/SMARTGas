@@ -5,15 +5,32 @@ const pool = require('../db'); // Importa o pool
  * (R)EAD: Lista todos os usuários
  * Rota: GET /admin-usuarios
  */
+// controllers/adminUsuarioController.js
+
+/**
+ * (R)EAD: Lista todos os usuários E CONTA SUAS VENDAS
+ * Rota: GET /admin-usuarios
+ */
 exports.index = async (req, res, next) => {
   try {
-    // Busca todos, exceto o usuário que está logado
+    // *** ESTA É A NOVA QUERY ***
+    // Ela junta 'usuarios' com 'vendas' e CONTA (COUNT) as vendas
+    // onde o ID do usuário bate com o 'frentista_id'
     const [usuarios] = await pool.query(
-      // Usando os nomes das suas colunas: id, usuario, funcao
-      'SELECT id, usuario, funcao FROM usuarios WHERE id != ? ORDER BY usuario',
-      [req.session.usuario.id] // Assumindo que o ID do admin está na sessão
+      `SELECT 
+          u.id, 
+          u.usuario, 
+          u.funcao, 
+          COUNT(v.id) AS total_vendas 
+       FROM usuarios u
+       LEFT JOIN vendas v ON u.id = v.frentista_id
+       WHERE u.id != ?
+       GROUP BY u.id, u.usuario, u.funcao
+       ORDER BY u.usuario`,
+      [req.session.usuario.id] // (ID do admin logado)
     );
     
+    // Enviamos os dados para o Jade (agora com a propriedade 'total_vendas')
     res.render('admin-usuarios/index', { usuarios: usuarios }); 
   
   } catch (err) {

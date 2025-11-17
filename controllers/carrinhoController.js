@@ -155,42 +155,65 @@ exports.add2 = async (req, res, next) => {
         next(err);
       }
   };
+  
+// controllers/carrinhoController.js
 
 exports.comprar = async (req, res, next) => {
   
-    const id = req.params.id;
-    const id2 = req.params.id2;
-    const [compra] = await pool.query(
-        'SELECT * FROM products WHERE id = ?', [id]
-      );
-
-      
-    compra.forEach(async(c)=>{
-    
-     c.stock=c.stock-1;
-     
-
-      
-      
-              await pool.execute(
-                `UPDATE products
-                   SET stock = ?
-                 WHERE id = ?`,
-                [c.stock , c.id]
-              );
-  
+  // --- NOSSOS DADOS DA VENDA ---
+  const id_produto = req.params.id;
+  const id_cliente = req.params.id2; // O ID do cliente (dono do carrinho)
+  const id_frentista = req.session.usuario.id; // O ID do funcionário (da sessão)
+  // --- FIM DOS DADOS ---
 
   try {
-    
-      await pool.execute('DELETE FROM carrinho WHERE id_products = ? AND id_usuario= ? LIMIT 1', [id, id2]);
-   
-      } catch (err) {
-      console.error(err);
-      next(err);
-      }
+    // 1. Busca o produto (para pegar o preço e checar o estoque)
+    const [compra] = await pool.query(
+      'SELECT * FROM products WHERE id = ?', [id_produto]
+    );
 
-  });
-  res.render('comprado');
+    if (compra.length === 0) {
+      return res.status(404).send('Produto não encontrado');
+    }
+
+    const produto = compra[0];
+    const preco_do_item = produto.price; 
+
+    if (produto.stock <= 0) {
+      return res.status(400).send('Produto sem estoque.');
+    }
+
+    // 2. Atualiza o estoque (decrementa 1)
+    await pool.execute(
+      `UPDATE products
+       SET stock = stock - 1
+       WHERE id = ?`,
+      [id_produto]
+    );
+
+    // 3. *** ESTA É A NOVA LÓGICA ***
+    //     Insere o registro da venda na nova tabela 'vendas'
+    await pool.execute(
+      `INSERT INTO vendas 
+        (frentista_id, cliente_id, produto_id, valor_venda) 
+       VALUES (?, ?, ?, ?)`,
+      [id_frentista, id_cliente, id_produto, preco_do_item]
+    );
+    // ******************************************************
+
+    // 4. Limpa o item do carrinho
+    await pool.execute(
+      'DELETE FROM carrinho WHERE id_products = ? AND id_usuario = ? LIMIT 1', 
+      [id_produto, id_cliente]
+    );
+
+    // 5. Mostra a tela de sucesso
+    res.render('comprado'); // (Sua tela de "Venda Realizada")
+
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
 };
 
   
