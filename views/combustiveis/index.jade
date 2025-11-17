@@ -30,7 +30,6 @@ block content
               form(method="POST", action='/combustiveis/' + combustivel.id + '/update', style="margin-bottom: 15px;")
                 .form-group
                   label.form-label Preço Atual (R$ por Litro)
-                  //- CORREÇÃO DA VÍRGULA: type="text"
                   input.form-input(type="text", inputmode="decimal", name="preco_por_litro", value=combustivel.preco_por_litro, required)
                 .form-actions
                   button.btn-primary(type="submit") Atualizar Preço
@@ -39,7 +38,6 @@ block content
               form(method="POST", action='/combustiveis/' + combustivel.id + '/update', style="margin-bottom: 15px;")
                 .form-group
                   label.form-label Adicionar ao Tanque (Litros)
-                  //- CORREÇÃO DA VÍRGULA: type="text"
                   input.form-input(type="text", inputmode="decimal", name="adicionar_litros", placeholder="Ex: 5000.00")
                 .form-actions
                   button.btn-save(type="submit") Adicionar Estoque
@@ -48,7 +46,44 @@ block content
               form(method="POST", action='/combustiveis/' + combustivel.id + '/update')
                 .form-group
                   label.form-label Remover do Tanque (Litros)
-                  //- CORREÇÃO DA VÍRGULA: type="text"
                   input.form-input(type="text", inputmode="decimal", name="remover_litros", placeholder="Ex: 50.00 (para ajuste ou perda)")
                 .form-actions
                   button.btn-delete(type="submit") Remover do Estoque
+              
+              //- --- [INÍCIO DO NOVO FORMULÁRIO DE PROMOÇÃO] ---
+              hr(style="border-color: #444; margin: 15px 0;")
+              
+              h4(style="margin-bottom: 10px;") Configurar "Happy Hour"
+              
+              form(method="POST", action='/combustiveis/' + combustivel.id + '/update')
+                
+                //- O Checkbox "Ativar"
+                .form-group(style="background-color: #333; padding: 10px; border-radius: 5px;")
+                  label.form-label(for="promo_ativo_" + combustivel.id, style="display: flex; align-items: center; gap: 10px;")
+                    //- 'checked' é 'true' se combustivel.promo_ativo == 1
+                    input(type="checkbox", name="promo_ativo", id="promo_ativo_" + combustivel.id, checked=combustivel.promo_ativo)
+                    | Ativar Preço Promocional
+                
+                //- O Preço
+                .form-group
+                  label.form-label Preço Promocional (R$)
+                  input.form-input(type="text", inputmode="decimal", name="preco_promocional", value=combustivel.preco_promocional)
+
+                //- Horários (Início e Fim)
+                .form-group(style="display: flex; gap: 10px;")
+                  div(style="flex: 1;")
+                    label.form-label Hora de Início
+                    input.form-input(type="time", name="promo_hora_inicio", value=combustivel.promo_hora_inicio)
+                  div(style="flex: 1;")
+                    label.form-label Hora de Fim
+                    input.form-input(type="time", name="promo_hora_fim", value=combustivel.promo_hora_fim)
+                
+                //- Dias da Semana
+                .form-group
+                  label.form-label Dias da Semana (Ex: 1,2,3,4,5)
+                  input.form-input(type="text", name="promo_dias_semana", value=combustivel.promo_dias_semana, placeholder="Dom=0, Seg=1, Ter=2...")
+                  .file-hint(style="color: #999;") Domingo=0, Segunda=1, Terça=2, Quarta=3, Quinta=4, Sexta=5, Sábado=6
+                
+                .form-actions
+                  button.btn-primary(type="submit") Salvar Promoção
+              //- --- [FIM DO NOVO FORMULÁRIO] ---

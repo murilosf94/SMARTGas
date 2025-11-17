@@ -161,3 +161,12 @@ ADD FOREIGN KEY (combustivel_id) REFERENCES combustiveis(id);
 -- 3. Adiciona um 'tipo' para sabermos o que foi vendido
 ALTER TABLE vendas
 ADD COLUMN tipo_venda ENUM('produto', 'combustivel') NOT NULL DEFAULT 'produto';
+
+
+
+ALTER TABLE combustiveis
+ADD COLUMN preco_promocional DECIMAL(10, 3) NULL,
+ADD COLUMN promo_ativo TINYINT(1) NOT NULL DEFAULT 0, -- 0 = Inativo, 1 = Ativo
+ADD COLUMN promo_hora_inicio TIME NULL,              -- Ex: '14:00:00'
+ADD COLUMN promo_hora_fim TIME NULL,                -- Ex: '16:00:00'
+ADD COLUMN promo_dias_semana VARCHAR(15) NULL;      -- Ex: '1,2,3,4,5' (Seg-Sex)

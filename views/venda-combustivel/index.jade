@@ -23,14 +23,20 @@ block content
               select.form-input(name="combustivel_id", id="select-combustivel", required)
                 option(value="") -- Selecione --
                 each c in combustiveis
-                  //- Guardamos o preço e o alerta no próprio 'option'
+                  //- [INÍCIO DA CORREÇÃO]
+                  //- Trocamos a sintaxe de crase (`) pela concatenação (+) do Jade
                   option(
                     value=c.id, 
-                    data-preco=c.preco_por_litro, 
-                    data-alerta=c.estoqueBaixo
-                  )= c.nome + ` (R$ ${parseFloat(c.preco_por_litro).toFixed(3)}/L)`
+                    data-preco=c.preco_vigente,
+                    data-alerta=c.estoqueBaixo,
+                    data-promo=c.emPromocao
+                  )= c.nome + ' (R$ ' + parseFloat(c.preco_vigente).toFixed(3) + '/L)'
+                  //- [FIM DA CORREÇÃO]
             
-            //- ALERTA DE ESTOQUE (só aparece se o estoque estiver baixo)
+            //- [NOVO] AVISO DE PROMOÇÃO
+            #aviso-promocao(style="display: none; text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 15px;")
+              | 🎉 Preço Promocional Ativo! 🎉
+            
             #alerta-estoque.form-group(style="display: none;")
               p(style="color: #dc3545; font-weight: bold; text-align: center;") 
                 | ⚠️ ATENÇÃO: Estoque baixo para este combustível!
@@ -38,39 +44,40 @@ block content
             //- 2. OS DOIS CAMPOS (REAIS E LITROS)
             .form-group
               label.form-label Valor (R$)
-              input.form-input(type="number", step="0.01", name="valor_reais", id="input-reais", placeholder="Ex: 50.00")
+              input.form-input(type="text", inputmode="decimal", name="valor_reais", id="input-reais", placeholder="Ex: 50,00")
               
             .form-group
               label.form-label Litros (L)
-              input.form-input(type="number", step="0.01", name="valor_litros", id="input-litros", placeholder="Ex: 10.00")
+              input.form-input(type="text", inputmode="decimal", name="valor_litros", id="input-litros", placeholder="Ex: 10,00")
 
             .form-actions
               button.btn-primary(type="submit") Registrar Venda
 
-  //- *** O JAVASCRIPT MÁGICO ***
-  //- Este script roda no navegador do frentista
+  //- --- SCRIPT ATUALIZADO (para aceitar vírgula e mostrar aviso de promo) ---
   script.
-    // Pega os elementos
     const selectCombustivel = document.getElementById('select-combustivel');
     const inputReais = document.getElementById('input-reais');
     const inputLitros = document.getElementById('input-litros');
     const alertaEstoque = document.getElementById('alerta-estoque');
+    const avisoPromocao = document.getElementById('aviso-promocao');
     
     let precoLitroAtual = 0;
 
-    // Quando o frentista ESCOLHE o combustível
+    // Função helper para converter vírgula em ponto
+    function parsePtBr(valor) {
+      return parseFloat(valor.replace(',', '.')) || 0;
+    }
+
     selectCombustivel.addEventListener('change', (e) => {
       const selectedOption = e.target.options[e.target.selectedIndex];
       precoLitroAtual = parseFloat(selectedOption.getAttribute('data-preco')) || 0;
       
-      // Mostra ou esconde o alerta
-      if (selectedOption.getAttribute('data-alerta') === 'true') {
-        alertaEstoque.style.display = 'block';
-      } else {
-        alertaEstoque.style.display = 'none';
-      }
+      // Mostra/Esconde Alerta de Estoque
+      alertaEstoque.style.display = (selectedOption.getAttribute('data-alerta') === 'true') ? 'block' : 'none';
       
-      // Limpa os campos
+      // Mostra/Esconde Aviso de Promoção
+      avisoPromocao.style.display = (selectedOption.getAttribute('data-promo') === 'true') ? 'block' : 'none';
+      
       inputReais.value = '';
       inputLitros.value = '';
     });
@@ -78,19 +85,17 @@ block content
     // Quando o frentista DIGITA em REAIS
     inputReais.addEventListener('input', (e) => {
       if (!precoLitroAtual) return;
-      const reais = parseFloat(e.target.value) || 0;
+      const reais = parsePtBr(e.target.value);
       
-      // Converte para Litros
       const litros = reais / precoLitroAtual;
-      inputLitros.value = litros.toFixed(2); // Arredonda para 2 casas
+      inputLitros.value = litros.toFixed(2).replace('.', ','); // Converte de volta para vírgula
     });
 
     // Quando o frentista DIGITA em LITROS
     inputLitros.addEventListener('input', (e) => {
       if (!precoLitroAtual) return;
-      const litros = parseFloat(e.target.value) || 0;
+      const litros = parsePtBr(e.target.value);
       
-      // Converte para Reais
       const reais = litros * precoLitroAtual;
-      inputReais.value = reais.toFixed(2); // Arredonda para 2 casas
+      inputReais.value = reais.toFixed(2).replace('.', ','); // Converte de volta para vírgula
     });
