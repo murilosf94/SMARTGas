@@ -9,7 +9,7 @@ block content
             if c.id_products === p.id
               .product-card
                 .product-image-container
-                  a.product-link(href="/products/#{p.id}")
+                  a.product-link(href="/products/" + p.id)
                     if p.imageUrl
                       img.product-image(src=p.imageUrl, alt=p.name)
                     else
@@ -18,13 +18,48 @@ block content
                         | Sem imagem
                 
                 .product-content
-                  h3.product-title #{p.name}
+                  h3.product-title= p.name
                   
-                  .product-price R$ #{p.price}
+                  .product-price R$ #{parseFloat(p.price).toFixed(2)}
                   
                   .product-quantity
-                    strong Quantidade: #{c.quantidade}
+                    strong Quantidade: 1
                   
-                  .product-actions
-                    a.btn-buy(href="/carrinho/comprar/#{session.usuario.id}/#{p.id}") Comprar
-    
+                  //- --- [ INÍCIO DA MUDANÇA ] ---
+                  //- Adicionamos 'display: flex' para alinhar os botões
+                  .product-actions(style="display: flex; gap: 10px;")
+                    
+                    //- Botão Comprar (Form 1)
+                    form(method="POST", action='/carrinho/comprar/' + p.id + '/' + c.id_usuario, style="margin:0;")
+                      button.btn-buy(type="submit") Comprar
+                    
+                    //- Botão Remover (Form 2)
+                    //- Envia para a nova rota '/remover'
+                    form(method="POST", action='/carrinho/remover/' + p.id + '/' + c.id_usuario, style="margin:0;")
+                      //- Usa a classe 'btn-delete' (vermelho) que já temos
+                      button.btn-delete(type="submit") Remover
+                  //- --- [ FIM DA MUDANÇA ] ---
+      
+      //- --- Seção de Checkout ---
+      if carrinho && carrinho.length > 0
+        .checkout-section(style="margin-top: 30px; padding: 20px; border-top: 2px solid #444; background-color: #222;")
+          
+          h2(style="margin-bottom: 20px;") Resumo do Pedido
+          
+          - let total = 0
+          each c in carrinho
+            each p in products
+              if c.id_products === p.id
+                - total += parseFloat(p.price)
+          
+          h3.total-price(style="font-size: 1.5rem; color: #4CAF50; margin-bottom: 25px;") 
+            | Total: R$ #{total.toFixed(2)}
+          
+          form(method="POST", action='/carrinho/' + carrinho[0].id_usuario + '/checkout')
+            button.btn-primary(type="submit", style="width: 100%; padding: 15px; font-size: 1.2rem;")
+              | Finalizar Venda (Comprar Carrinho Inteiro)
+      
+      else
+        .empty-state
+          h3 Seu carrinho está vazio.
+          a.btn-primary(href="/nossosprodutos") Ver produtos de conveniência

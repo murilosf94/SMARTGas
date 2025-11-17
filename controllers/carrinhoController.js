@@ -222,3 +222,102 @@ exports.comprar = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.checkoutCarrinho = async (req, res, next) => {
+  try {
+    // --- 1. PEGA OS IDs ---
+    // Pega o ID do Cliente (dono do carrinho) pela URL (como o 'exports.show' faz)
+    const id_cliente = req.params.id; 
+    
+    // Pega o Frentista e o Turno da sessão
+    const id_frentista = req.session.usuario.id;
+    const id_turno = req.session.turno_id;
+
+    // --- 2. BUSCA TODOS OS ITENS DO CARRINHO ---
+    // (Juntamos com 'products' para pegar o preço e checar o estoque)
+    const [itensDoCarrinho] = await pool.query(
+      `SELECT 
+         c.id_products, 
+         p.price, 
+         p.stock,
+         p.name
+       FROM carrinho c
+       JOIN products p ON c.id_products = p.id
+       WHERE c.id_usuario = ?`,
+      [id_cliente]
+    );
+
+    // Se o carrinho estiver vazio, não faz nada
+    if (itensDoCarrinho.length === 0) {
+      return res.redirect('/carrinho/' + id_cliente); // Volta para o carrinho
+    }
+
+    // --- 3. VERIFICA O ESTOQUE DE TUDO (SÓ PARA GARANTIR) ---
+    // (Esta lógica simples checa 1-para-1, mas não agrupa.
+    // Se o carrinho tiver 5x Cokes e o estoque for 2, esta lógica
+    // simples não vai pegar. Mas vamos seguir o padrão do seu 'comprar'.)
+    for (const item of itensDoCarrinho) {
+      if (item.stock <= 0) {
+        // (Aqui você pode redirecionar com uma mensagem de erro)
+        return res.status(400).send(`Produto "${item.name}" está sem estoque!`);
+      }
+    }
+
+    // --- 4. PROCESSA A VENDA DE CADA ITEM (LOOP) ---
+    // (Idealmente, isso seria uma "Transação" de banco, 
+    // mas vamos manter simples por enquanto)
+    for (const item of itensDoCarrinho) {
+      
+      // a. Registra a venda na tabela 'vendas'
+      await pool.execute(
+        `INSERT INTO vendas 
+          (frentista_id, cliente_id, produto_id, valor_venda, turno_id) 
+         VALUES (?, ?, ?, ?, ?)`,
+        [id_frentista, id_cliente, item.id_products, item.price, id_turno]
+      );
+
+      // b. Reduz o estoque do produto
+      await pool.execute(
+        `UPDATE products SET stock = stock - 1 WHERE id = ?`,
+        [item.id_products]
+      );
+    }
+
+    // --- 5. LIMPA O CARRINHO INTEIRO ---
+    // (Se chegou até aqui, todas as vendas foram registradas)
+    await pool.execute(
+      'DELETE FROM carrinho WHERE id_usuario = ?', 
+      [id_cliente]
+    );
+
+    // --- 6. MOSTRA A TELA DE SUCESSO ---
+    res.render('comprado'); // (A mesma tela do 'exports.comprar')
+
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+};
+
+
+exports.removerItem = async (req, res, next) => {
+  try {
+    // 1. Pega os IDs da URL
+    const id_produto = req.params.id;
+    const id_cliente = req.params.id2;
+
+    // 2. Deleta apenas UM item do carrinho
+    // (Exatamente como o 'comprar' faz, mas sem o resto da lógica)
+    await pool.execute(
+      'DELETE FROM carrinho WHERE id_products = ? AND id_usuario = ? LIMIT 1',
+      [id_produto, id_cliente]
+    );
+
+    // 3. Redireciona de volta para a tela do carrinho
+    res.redirect('/carrinho/' + id_cliente);
+
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+};

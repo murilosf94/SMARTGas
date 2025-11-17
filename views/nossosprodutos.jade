@@ -16,38 +16,36 @@ block content
             .product-card
               .product-image-container
                 if p.imageUrl
-                  a.product-link(href="/products/#{p.id}")
+                  //- Correção: Sintaxe de link do Jade
+                  a.product-link(href="/products/" + p.id)
                     img.product-image(src=p.imageUrl, alt=p.name)
                 else
-                  a.product-link(href="/products/#{p.id}")
+                  //- Correção: Sintaxe de link do Jade
+                  a.product-link(href="/products/" + p.id)
                     .product-placeholder
                       .placeholder-icon 📦
                       span Sem imagem
 
               .product-content
-                h3.product-title #{p.name}
-                .product-price R$ #{p.price}
+                //- Correção: Sintaxe de texto
+                h3.product-title= p.name
+                
+                //- Correção: Formatação de preço
+                .product-price R$ #{parseFloat(p.price).toFixed(2)}
                 
                 .product-actions
-                  a.btn-buy(href="/products/#{p.id}") Ver Detalhes
+                  //- Correção: Sintaxe de link do Jade
+                  a.btn-buy(href="/products/" + p.id) Ver Detalhes
+                  
                   if session.usuario
-                    if p.stock>0
-                      a.btn-cart(href="/carrinho/add/#{session.usuario.id}/#{p.id}")
-                        span.cart-icon 🛒
-                        | Adicionar
-
-        //- .products-sidebar
-        //-   .sidebar-card
-        //-     .sidebar-header
-        //-       h3 Categorias
-        //-     .sidebar-content
-        //-       .category-list
-        //-         a.category-item(href="/nossosprodutos")
-        //-           span.category-icon 👕
-        //-           | Moda
-        //-         a.category-item(href="/nossosprodutos")
-        //-           span.category-icon 💻
-        //-           | Eletrônicos
-        //-         a.category-item(href="/nossosprodutos")
-        //-           span.category-icon &#x26BD
-        //-           | Esportes
+                    if p.stock > 0
+                      //- --- [A CORREÇÃO PRINCIPAL ESTÁ AQUI] ---
+                      //- Trocamos o 'a' (link GET) por um 'form' (POST)
+                      form(method="POST", action="/carrinho/add/" + session.usuario.id + "/" + p.id, style="margin: 0;")
+                        button.btn-cart(type="submit")
+                          span.cart-icon 🛒
+                          | Adicionar
+                    else
+                      //- [BÔNUS UX] Mostra 'Esgotado' se o estoque for 0
+                      button.btn-cart(type="submit", disabled, style="background-color: #555;")
+                        | Esgotado
