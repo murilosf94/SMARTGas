@@ -87,15 +87,15 @@ exports.registrarVenda = async (req, res, next) => {
     const combustivel = rows[0];
     const estoqueAtual = parseFloat(combustivel.estoque_litros);
 
-    // 2. *** A MÁGICA ***
-    //    Calcula o preço que DEVE ser usado AGORA
+    // 2. Calcula o preço (reutilizando a lógica)
     const emPromocao = isPromocaoAtivaAgora(combustivel);
     const precoLitro = parseFloat(emPromocao ? combustivel.preco_promocional : combustivel.preco_por_litro);
 
-    // 3. A LÓGICA DE CONVERSÃO (que você já tinha)
+    // 3. Lógica de conversão (que já tínhamos)
     let litrosVendidos = 0;
     let valorVenda = 0;
 
+    // (Corrigindo o bug da vírgula que fizemos antes)
     if (valor_reais && parseFloat(valor_reais.replace(',', '.')) > 0) {
       valorVenda = parseFloat(valor_reais.replace(',', '.'));
       litrosVendidos = valorVenda / precoLitro;
@@ -106,23 +106,55 @@ exports.registrarVenda = async (req, res, next) => {
       return res.status(400).send("Valor ou Litros inválidos.");
     }
 
-    // 4. Checa o estoque
+    // 4. Checa o estoque do TANQUE
     if (estoqueAtual < litrosVendidos) {
-      return res.status(400).send("Estoque insuficiente.");
+      return res.status(400).send("Estoque insuficiente no tanque.");
     }
 
-    // 5. Deduz o estoque
+    // --- [INÍCIO DAS NOVAS MUDANÇAS] ---
+
+    // 5. Adiciona os litros ao "odômetro" do TANQUE
+    const novoTotalBombeado = parseFloat(combustivel.total_litros_bombeados) + litrosVendidos;
+
+    // 6. Deduz o estoque E atualiza o odômetro (em uma só query)
     await pool.execute(
-      "UPDATE combustiveis SET estoque_litros = estoque_litros - ? WHERE id = ?",
-      [litrosVendidos, combustivel_id]
+      `UPDATE combustiveis SET 
+         estoque_litros = estoque_litros - ?,
+         total_litros_bombeados = ?
+       WHERE id = ?`,
+      [litrosVendidos, novoTotalBombeado, combustivel_id]
     );
 
-    // 6. REGISTRA A VENDA (com o valorVenda calculado, seja promo ou não)
+    // 7. REGISTRA A VENDA (já tínhamos isso)
     await pool.execute(
       `INSERT INTO vendas (frentista_id, turno_id, combustivel_id, valor_venda, tipo_venda) 
        VALUES (?, ?, ?, ?, 'combustivel')`,
       [frentista_id, turno_id, combustivel_id, valorVenda]
     );
+    
+    // 8. *** O GATILHO (O "Quando...") ***
+    const limite = parseFloat(combustivel.limite_manutencao_litros);
+    const limiar = parseFloat(combustivel.limiar_alerta_percentual); // Ex: 0.95
+    
+    // Se o total passou do limite (ex: 9500L) E o status ainda era 'ok'...
+    if (novoTotalBombeado >= (limite * limiar) && combustivel.status_manutencao === 'ok') {
+      
+      // *** A AÇÃO (O "Então...") ***
+      
+      // a. Muda o status do combustível para 'alerta'
+      await pool.execute(
+        "UPDATE combustiveis SET status_manutencao = 'alerta' WHERE id = ?",
+        [combustivel_id]
+      );
+      
+      // b. Cria a Ordem de Manutenção (o "Alerta")
+      await pool.execute(
+        `INSERT INTO ordens_manutencao (combustivel_id, motivo) 
+         VALUES (?, 'Manutenção recomendada: Limite de litros (Troca de Filtro) atingido.')`,
+        [combustivel_id]
+      );
+    }
+    // --- [FIM DAS NOVAS MUDANÇAS] ---
     
     res.redirect('/venda-combustivel'); 
     

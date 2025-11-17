@@ -1,0 +1,45 @@
+extends ../layout
+
+block content
+  .container
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Alertas de Manutenção
+          p.hero-description Ordens de serviço preventivas pendentes.
+    
+    .form-section
+      .container
+        .form-card
+          .form-header
+            h2 Alertas Pendentes
+          
+          .card-content
+            if alertas && alertas.length > 0
+              table.product-table
+                thead
+                  tr
+                    th Tanque (Combustível)
+                    th Motivo
+                    th Status
+                    th Total Bombeado
+                    th Limite
+                    th Ações
+                tbody
+                  each a in alertas
+                    tr
+                      td(data-label="Tanque")= a.combustivel_nome
+                      td(data-label="Motivo")= a.motivo
+                      td.valor-aberto(data-label="Status")= a.status
+                      td(data-label="Total Bombeado") #{parseFloat(a.total_litros_bombeados).toFixed(0)} L
+                      td(data-label="Limite") #{parseFloat(a.limite_manutencao_litros).toFixed(0)} L
+                      
+                      td.actions
+                        //- Botão para "Completar" e "Resetar"
+                        form(method="POST", action='/manutencao/' + a.id + '/combustivel/' + a.combustivel_id + '/completar')
+                          button.btn.btn-edit(type="submit") Manutenção Concluída
+            
+            else
+              .empty-state
+                h3 Nenhum alerta de manutenção pendente.

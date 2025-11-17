@@ -32,6 +32,7 @@ var productsRouter   = require('./routes/products');  // CRUD de produtos
 var turnoRouter = require('./routes/turnoRoutes'); // <-- 1. IMPORTE
 var combustiveisRouter = require('./routes/combustiveisRoutes'); // <-- 1. IMPORTE
 var vendaCombustivelRouter = require('./routes/vendaCombustivelRoutes'); // <-- 1. IMPORTE
+var manutencaoRouter = require('./routes/manutencaoRoutes'); // <-- 1. IMPORTE
 
 //const { estaLogado, eAdmin } = require('./middleware/authmiddleware');
 const { precisaDeTurnoAberto } = require('./middleware/turnoMiddleware');
@@ -117,6 +118,8 @@ app.get('/admin', estaLogado, eAdmin, (req, res) => {
 app.use('/dashboardadmin', estaLogado, eAdmin, dashboardadminRouter);
 
 app.use('/admin-usuarios', estaLogado, eAdmin, adminUsuariosRouter);
+
+app.use('/manutencao', manutencaoRouter); // <-- 2. USE (junto com rotas de admin)
 
 
 // Exemplo de consulta direta usando pool

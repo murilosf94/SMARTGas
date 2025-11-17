@@ -11,6 +11,9 @@ block content
 
     .form-section
       .container
+        .admin-header
+          h1.admin-title
+            a.btn-primary(href="/manutencao" style="margin-bottom: 20px; display: inline-block;") Manutenção
         each combustivel in combustiveis
           .form-card(style="margin-bottom: 20px;")
             .form-header
@@ -23,6 +26,13 @@ block content
             .card-content
               h3 Estoque Atual: #{parseFloat(combustivel.estoque_litros).toFixed(2)} Litros
               p(style="color: #999;") Nível mínimo: #{parseFloat(combustivel.estoque_minimo_litros).toFixed(2)} L
+              
+              //- [NOVO] Mostra o "Odômetro"
+              p(style="color: #999;") Total Bombeado (Manutenção): #{parseFloat(combustivel.total_litros_bombeados).toFixed(0)} L
+              
+              //- [NOVO] Alerta de Manutenção
+              if combustivel.status_manutencao === 'alerta'
+                p(style="color: #ffc107; font-weight: bold;") 🔔 MANUTENÇÃO RECOMENDADA!
               
               hr(style="border-color: #444; margin: 15px 0;")
               
@@ -50,26 +60,22 @@ block content
                 .form-actions
                   button.btn-delete(type="submit") Remover do Estoque
               
-              //- --- [INÍCIO DO NOVO FORMULÁRIO DE PROMOÇÃO] ---
+              //- --- Formulário de PROMOÇÃO ("Happy Hour") ---
               hr(style="border-color: #444; margin: 15px 0;")
               
               h4(style="margin-bottom: 10px;") Configurar "Happy Hour"
               
               form(method="POST", action='/combustiveis/' + combustivel.id + '/update')
                 
-                //- O Checkbox "Ativar"
                 .form-group(style="background-color: #333; padding: 10px; border-radius: 5px;")
                   label.form-label(for="promo_ativo_" + combustivel.id, style="display: flex; align-items: center; gap: 10px;")
-                    //- 'checked' é 'true' se combustivel.promo_ativo == 1
                     input(type="checkbox", name="promo_ativo", id="promo_ativo_" + combustivel.id, checked=combustivel.promo_ativo)
                     | Ativar Preço Promocional
                 
-                //- O Preço
                 .form-group
                   label.form-label Preço Promocional (R$)
                   input.form-input(type="text", inputmode="decimal", name="preco_promocional", value=combustivel.preco_promocional)
 
-                //- Horários (Início e Fim)
                 .form-group(style="display: flex; gap: 10px;")
                   div(style="flex: 1;")
                     label.form-label Hora de Início
@@ -78,7 +84,6 @@ block content
                     label.form-label Hora de Fim
                     input.form-input(type="time", name="promo_hora_fim", value=combustivel.promo_hora_fim)
                 
-                //- Dias da Semana
                 .form-group
                   label.form-label Dias da Semana (Ex: 1,2,3,4,5)
                   input.form-input(type="text", name="promo_dias_semana", value=combustivel.promo_dias_semana, placeholder="Dom=0, Seg=1, Ter=2...")
@@ -86,4 +91,16 @@ block content
                 
                 .form-actions
                   button.btn-primary(type="submit") Salvar Promoção
-              //- --- [FIM DO NOVO FORMULÁRIO] ---
+              
+              //- --- [INÍCIO DO NOVO FORMULÁRIO DE MANUTENÇÃO] ---
+              hr(style="border-color: #444; margin: 15px 0;")
+              
+              h4(style="margin-bottom: 10px;") Configurar Manutenção
+              
+              form(method="POST", action='/combustiveis/' + combustivel.id + '/update')
+                .form-group
+                  label.form-label Gerar Alerta de Manutenção a cada (Litros)
+                  input.form-input(type="text", inputmode="decimal", name="limite_manutencao_litros", value=combustivel.limite_manutencao_litros, required)
+                .form-actions
+                  button.btn-primary(type="submit") Salvar Limite
+              //- --- [FIM DO NOVO FORMULÁRIOS] ---
