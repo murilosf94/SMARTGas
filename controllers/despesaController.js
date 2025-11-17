@@ -60,17 +60,20 @@ exports.new = (req, res) => {
 exports.create = async (req, res, next) => {
   try {
     // 1) Pegar os dados do body (req.body)
-    const name = req.body.name ?? '';
-    const description = req.body.description ?? '';
-    const price = req.body.price ? parseFloat(req.body.price) : 0;
+    const { name, description, price } = req.body;
 
-    // 2) Usar pool.execute para inserir (igual ao seu)
+    // 2) Pegar os IDs da SESSÃO
+    const frentistaId = req.session.usuario.id;
+    const turnoId = req.session.turno_id;
+
+    // 3) Usar pool.execute para inserir (com os novos campos)
     await pool.execute(
-      'INSERT INTO despesas (name, description, price) VALUES (?, ?, ?)',
-      [name, description, price]
+      `INSERT INTO despesas (name, description, price, frentista_id, turno_id) 
+       VALUES (?, ?, ?, ?, ?)`,
+      [name, description, price, frentistaId, turnoId]
     );
 
-    // 3) Redirecionar para a lista
+    // 4) Redirecionar para a lista de despesas
     res.redirect('/despesas'); 
 
   } catch (err) {

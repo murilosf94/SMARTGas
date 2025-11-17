@@ -1,34 +1,36 @@
 const pool = require('../db');
+
 exports.show = async (req, res, next) => {
-    try {
-      const [carrinho] = await pool.query(
-        'SELECT * FROM carrinho WHERE id_usuario = ?',
-        [req.params.id]
-      );
-      const [products] = await pool.query(
-        'SELECT * FROM products ORDER BY createdAt DESC'
-      );
-      //if (rows.length === 0) return res.status(404).send('Produto não encontrado');
-      res.render('carrinho', { carrinho, products });
-    } catch (err) {
-      next(err);
-    }
-  };
-exports.add = async (req, res, next) => {
+  try {
     const [carrinho] = await pool.query(
-        'SELECT * FROM carrinho'
-      );
-    /*carrinho.forEach(async (c)=>{
-        if (req.params.id == c.id_usuario && req.params.id2==c.id_products){
-            c.quantidade=c.quantidade+1;
-             await pool.execute(
+      'SELECT * FROM carrinho WHERE id_usuario = ?',
+      [req.params.id]
+    );
+    const [products] = await pool.query(
+      'SELECT * FROM products ORDER BY createdAt DESC'
+    );
+    //if (rows.length === 0) return res.status(404).send('Produto não encontrado');
+    res.render('carrinho', { carrinho, products });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.add = async (req, res, next) => {
+  const [carrinho] = await pool.query(
+    'SELECT * FROM carrinho'
+  );
+  /*carrinho.forEach(async (c)=>{
+      if (req.params.id == c.id_usuario && req.params.id2==c.id_products){
+          c.quantidade=c.quantidade+1;
+            await pool.execute(
                 `UPDATE carrinho
-                   SET quantidade=?
-                 WHERE id = ?`,
+                    SET quantidade=?
+                  WHERE id = ?`,
                 [c.quantidade , c.id ]
-              );
-              
-              try {
+            );
+            
+            try {
                 const [carrinho] = await pool.query(
                   'SELECT * FROM carrinho WHERE id_usuario = ?',
                   [req.params.id]
@@ -38,68 +40,68 @@ exports.add = async (req, res, next) => {
                 );
                 //if (rows.length === 0) return res.status(404).send('Produto não encontrado');
                 res.render('carrinho', { carrinho, products });
-              } catch (err) {
+            } catch (err) {
                 next(err);
-              }
-        }
-        
-        
-    }
-    );*/
-    
-
-    try {
-
-        // 1) Pegue do body e atribua valores padrão caso venha undefined
-        const id_usuario       = req.params.id;
-        const id_products      = req.params.id2;
-        // Converta para número ou 0
-        
-        
-        // 2) Agora envie valores SEM undefined
-        await pool.execute(
-          `INSERT INTO carrinho
-            (id_usuario, id_products)
-           VALUES (?, ?)`,
-          [id_usuario,id_products]
-        );
-        
-        
-    
-        
-      } catch (err) {
-        next(err);
+            }
       }
-      try {
-        const [carrinho] = await pool.query(
-          'SELECT * FROM carrinho WHERE id_usuario = ?',
-          [req.params.id]
-        );
-        const [products] = await pool.query(
-          'SELECT * FROM products ORDER BY createdAt DESC'
-        );
-        //if (rows.length === 0) return res.status(404).send('Produto não encontrado');
-        res.render('carrinho', { carrinho, products });
-      } catch (err) {
-        next(err);
-      }
-  };
+      
+      
+  }
+  );*/
+
+
+  try {
+
+    // 1) Pegue do body e atribua valores padrão caso venha undefined
+    const id_usuario = req.params.id;
+    const id_products = req.params.id2;
+    // Converta para número ou 0
+    
+    
+    // 2) Agora envie valores SEM undefined
+    await pool.execute(
+      `INSERT INTO carrinho
+        (id_usuario, id_products)
+       VALUES (?, ?)`,
+      [id_usuario,id_products]
+    );
+    
+    
+  
+    
+  } catch (err) {
+    next(err);
+  }
+  try {
+    const [carrinho] = await pool.query(
+      'SELECT * FROM carrinho WHERE id_usuario = ?',
+      [req.params.id]
+    );
+    const [products] = await pool.query(
+      'SELECT * FROM products ORDER BY createdAt DESC'
+    );
+    //if (rows.length === 0) return res.status(404).send('Produto não encontrado');
+    res.render('carrinho', { carrinho, products });
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.add2 = async (req, res, next) => {
-    const [carrinho] = await pool.query(
-        'SELECT * FROM carrinho'
-      );
-    /*carrinho.forEach(async (c)=>{
-        if (req.params.id == c.id_usuario && req.params.id2==c.id_products){
-            c.quantidade=c.quantidade+req.body.quantity;
-             await pool.execute(
+  const [carrinho] = await pool.query(
+    'SELECT * FROM carrinho'
+  );
+  /*carrinho.forEach(async (c)=>{
+      if (req.params.id == c.id_usuario && req.params.id2==c.id_products){
+          c.quantidade=c.quantidade+req.body.quantity;
+            await pool.execute(
                 `UPDATE carrinho
-                   SET quantidade=?
-                 WHERE id = ?`,
+                    SET quantidade=?
+                  WHERE id = ?`,
                 [c.quantidade , c.id ]
-              );
-              
-              try {
+            );
+            
+            try {
                 const [carrinho] = await pool.query(
                   'SELECT * FROM carrinho WHERE id_usuario = ?',
                   [req.params.id]
@@ -109,53 +111,53 @@ exports.add2 = async (req, res, next) => {
                 );
                 //if (rows.length === 0) return res.status(404).send('Produto não encontrado');
                 res.render('carrinho', { carrinho, products });
-              } catch (err) {
+            } catch (err) {
                 next(err);
-              }
-        }
-        
-        
-    }
-    );*/
-    
-
-    try {
-
-        // 1) Pegue do body e atribua valores padrão caso venha undefined
-        const id_usuario       = req.params.id;
-        const id_products      = req.params.id2;
-        // Converta para número ou 0
-        
-        
-        // 2) Agora envie valores SEM undefined
-        await pool.execute(
-          `INSERT INTO carrinho
-            (id_usuario, id_products)
-           VALUES (?, ?)`,
-          [id_usuario,id_products]
-        );
-        
-        
-    
-        
-      } catch (err) {
-        next(err);
+            }
       }
-      try {
-        const [carrinho] = await pool.query(
-          'SELECT * FROM carrinho WHERE id_usuario = ?',
-          [req.params.id]
-        );
-        const [products] = await pool.query(
-          'SELECT * FROM products ORDER BY createdAt DESC'
-        );
-        //if (rows.length === 0) return res.status(404).send('Produto não encontrado');
-        res.render('carrinho', { carrinho, products });
-      } catch (err) {
-        next(err);
-      }
-  };
+      
+      
+  }
+  );*/
+
+
+  try {
+
+    // 1) Pegue do body e atribua valores padrão caso venha undefined
+    const id_usuario = req.params.id;
+    const id_products = req.params.id2;
+    // Converta para número ou 0
+    
+    
+    // 2) Agora envie valores SEM undefined
+    await pool.execute(
+      `INSERT INTO carrinho
+        (id_usuario, id_products)
+       VALUES (?, ?)`,
+      [id_usuario,id_products]
+    );
+    
+    
   
+    
+  } catch (err) {
+    next(err);
+  }
+  try {
+    const [carrinho] = await pool.query(
+      'SELECT * FROM carrinho WHERE id_usuario = ?',
+      [req.params.id]
+    );
+    const [products] = await pool.query(
+      'SELECT * FROM products ORDER BY createdAt DESC'
+    );
+    //if (rows.length === 0) return res.status(404).send('Produto não encontrado');
+    res.render('carrinho', { carrinho, products });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // controllers/carrinhoController.js
 
 exports.comprar = async (req, res, next) => {
@@ -164,6 +166,9 @@ exports.comprar = async (req, res, next) => {
   const id_produto = req.params.id;
   const id_cliente = req.params.id2; // O ID do cliente (dono do carrinho)
   const id_frentista = req.session.usuario.id; // O ID do funcionário (da sessão)
+  
+  // <-- MUDANÇA 1: Pega o ID do turno que está aberto na sessão
+  const id_turno = req.session.turno_id; 
   // --- FIM DOS DADOS ---
 
   try {
@@ -193,11 +198,13 @@ exports.comprar = async (req, res, next) => {
 
     // 3. *** ESTA É A NOVA LÓGICA ***
     //     Insere o registro da venda na nova tabela 'vendas'
+    
+    // <-- MUDANÇA 2: Adiciona a coluna 'turno_id' no INSERT
     await pool.execute(
       `INSERT INTO vendas 
-        (frentista_id, cliente_id, produto_id, valor_venda) 
-       VALUES (?, ?, ?, ?)`,
-      [id_frentista, id_cliente, id_produto, preco_do_item]
+        (frentista_id, cliente_id, produto_id, valor_venda, turno_id) 
+       VALUES (?, ?, ?, ?, ?)`, // <-- 5 interrogações
+      [id_frentista, id_cliente, id_produto, preco_do_item, id_turno] // <-- 5 valores
     );
     // ******************************************************
 
@@ -215,5 +222,3 @@ exports.comprar = async (req, res, next) => {
     next(err);
   }
 };
-
-  

@@ -29,6 +29,12 @@ const authRoutes     = require('./routes/authroute');
 var adminUsuariosRouter = require('./routes/adminUsuariosRoutes');
 const { estaLogado, eAdmin } = require('./middleware/authmiddleware');
 var productsRouter   = require('./routes/products');  // CRUD de produtos
+var turnoRouter = require('./routes/turnoRoutes'); // <-- 1. IMPORTE
+var combustiveisRouter = require('./routes/combustiveisRoutes'); // <-- 1. IMPORTE
+var vendaCombustivelRouter = require('./routes/vendaCombustivelRoutes'); // <-- 1. IMPORTE
+
+//const { estaLogado, eAdmin } = require('./middleware/authmiddleware');
+const { precisaDeTurnoAberto } = require('./middleware/turnoMiddleware');
 
 var app = express();
 
@@ -90,14 +96,19 @@ app.use('/categorias/eletronicos', eletronicosRouter);
 app.use('/products', estaLogado, productsRouter);
 
 // Rotas protegidas
+app.use('/turno', turnoRouter); 
 app.use('/users', estaLogado, usersRouter);
-app.use('/carrinho', estaLogado, carrinhoRouter);
+app.use('/carrinho', estaLogado, precisaDeTurnoAberto, carrinhoRouter);
+app.use('/clientes', estaLogado, precisaDeTurnoAberto, clientesRouter);
 app.use('/pedidos', estaLogado, pedidosRouter);
-app.use('/anunciar', estaLogado, anunciarRouter);
+app.use('/anunciar', estaLogado, precisaDeTurnoAberto, anunciarRouter);
 app.use('/perfil', estaLogado, meuperfilRouter);
-app.use('/despesas', estaLogado, despesasRouter);
+app.use('/despesas', estaLogado, precisaDeTurnoAberto, despesasRouter);
 app.use('/fornecedores', estaLogado, fornecedoresRouter);
-app.use('/clientes', estaLogado, clientesRouter);
+app.use('/venda-combustivel', estaLogado, precisaDeTurnoAberto, vendaCombustivelRouter); // <-- 2. USE
+//app.use('/clientes', estaLogado, clientesRouter);
+app.use('/combustiveis', estaLogado, combustiveisRouter); // <-- 2. USE
+
 
 // Rota admin
 app.get('/admin', estaLogado, eAdmin, (req, res) => {
@@ -106,6 +117,7 @@ app.get('/admin', estaLogado, eAdmin, (req, res) => {
 app.use('/dashboardadmin', estaLogado, eAdmin, dashboardadminRouter);
 
 app.use('/admin-usuarios', estaLogado, eAdmin, adminUsuariosRouter);
+
 
 // Exemplo de consulta direta usando pool
 app.get('/select', estaLogado, async (req, res) => {

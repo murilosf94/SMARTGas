@@ -1,0 +1,61 @@
+extends ../layout
+
+block content
+  .container
+    //- Bloco 1: Hero
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Fechar Turno
+          p.hero-description Confira o resumo do turno e informe o valor final no caixa.
+
+    //- Bloco 2: O Card do Relatório e Formulário
+    .form-section
+      .container
+        .form-card
+          
+          //- O Relatório (Dados vêm do controller)
+          .form-header
+            h2 Resumo do Turno
+          
+          .card-content(style="padding-top: 20px; padding-bottom: 20px;")
+            //- Estilo para o relatório
+            style.
+              .report-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #444; }
+              .report-item span { font-size: 1.1rem; }
+              .report-item .value { font-weight: bold; }
+              .report-item .total { color: #4CAF50; font-size: 1.3rem; }
+              .report-item .negative .value { color: #dc3545; } //- [CSS ADICIONADO]
+
+            .report-item
+              span Valor Inicial (Troco):
+              span.value R$ #{valorInicial}
+            .report-item
+              span Total de Vendas no Turno:
+              span.value R$ #{totalVendas}
+            
+            //- [LINHA ADICIONADA]
+            //- Mostra o total de despesas (que vem do controller)
+            .report-item.negative
+              span Total de Despesas no Turno:
+              span.value - R$ #{totalDespesas}
+              
+            .report-item.total
+              span Valor Esperado na Gaveta:
+              span.value.total R$ #{valorEsperado}
+
+          //- O Formulário para fechar
+          form.product-form(method="POST", action="/turno/fechar")
+            
+            .form-group
+              label.form-label Valor Final Contado (R$)
+              input.form-input(type="number", step="0.01", name="valor_final", placeholder="0,00", required, autofocus)
+              .file-hint(style="color: #999; margin-top: 8px;")
+                | Informe o valor total que você contou na gaveta (incluindo o troco).
+
+            .form-actions
+              a.btn-cancel(href="/") Cancelar
+              button.btn-primary(type="submit", style="background-color: #dc3545;") 
+                | Encerrar Turno
+                span.btn-arrow →

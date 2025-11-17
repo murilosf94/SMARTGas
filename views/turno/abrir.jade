@@ -1,0 +1,31 @@
+extends ../layout
+
+block content
+  .container
+    //- Bloco 1: Hero
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Abrir Turno
+          p.hero-description Você precisa abrir um turno para começar a vender.
+
+    //- Bloco 2: O Card do Formulário
+    .form-section
+      .container
+        .form-card
+          .form-header
+            h2 Valor Inicial do Caixa
+            p(style="color: #999; margin-top: 5px;") Insira o valor do troco inicial na gaveta.
+          
+          //- Action aponta para a rota POST /turno/abrir
+          form.product-form(method="POST", action="/turno/abrir")
+            
+            .form-group
+              label.form-label Valor Inicial (R$)
+              input.form-input(type="number", step="0.01", name="valor_inicial", placeholder="0,00", required, autofocus)
+            
+            .form-actions
+              button.btn-primary(type="submit") 
+                | Iniciar Turno
+                span.btn-arrow →

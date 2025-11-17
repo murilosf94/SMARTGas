@@ -1,0 +1,54 @@
+extends ../layout
+
+block content
+  .container
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Gerenciar Combustíveis
+          p.hero-description Veja o estoque e atualize os preços.
+
+    .form-section
+      .container
+        each combustivel in combustiveis
+          .form-card(style="margin-bottom: 20px;")
+            .form-header
+              h2= combustivel.nome
+              
+              //- O ALERTA DE ESTOQUE BAIXO
+              if combustivel.estoqueBaixo
+                span(style="color: #dc3545; font-weight: bold;") ⚠️ ESTOQUE BAIXO!
+
+            .card-content
+              h3 Estoque Atual: #{parseFloat(combustivel.estoque_litros).toFixed(2)} Litros
+              p(style="color: #999;") Nível mínimo: #{parseFloat(combustivel.estoque_minimo_litros).toFixed(2)} L
+              
+              hr(style="border-color: #444; margin: 15px 0;")
+              
+              //- Formulário para MUDAR O PREÇO
+              form(method="POST", action='/combustiveis/' + combustivel.id + '/update', style="margin-bottom: 15px;")
+                .form-group
+                  label.form-label Preço Atual (R$ por Litro)
+                  //- CORREÇÃO DA VÍRGULA: type="text"
+                  input.form-input(type="text", inputmode="decimal", name="preco_por_litro", value=combustivel.preco_por_litro, required)
+                .form-actions
+                  button.btn-primary(type="submit") Atualizar Preço
+
+              //- Formulário para ADICIONAR ESTOQUE
+              form(method="POST", action='/combustiveis/' + combustivel.id + '/update', style="margin-bottom: 15px;")
+                .form-group
+                  label.form-label Adicionar ao Tanque (Litros)
+                  //- CORREÇÃO DA VÍRGULA: type="text"
+                  input.form-input(type="text", inputmode="decimal", name="adicionar_litros", placeholder="Ex: 5000.00")
+                .form-actions
+                  button.btn-save(type="submit") Adicionar Estoque
+
+              //- Formulário para REMOVER ESTOQUE
+              form(method="POST", action='/combustiveis/' + combustivel.id + '/update')
+                .form-group
+                  label.form-label Remover do Tanque (Litros)
+                  //- CORREÇÃO DA VÍRGULA: type="text"
+                  input.form-input(type="text", inputmode="decimal", name="remover_litros", placeholder="Ex: 50.00 (para ajuste ou perda)")
+                .form-actions
+                  button.btn-delete(type="submit") Remover do Estoque

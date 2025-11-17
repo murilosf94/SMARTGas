@@ -1,0 +1,96 @@
+extends ../layout
+
+block content
+  .container
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Venda de Combustível
+          p.hero-description Selecione o combustível e o valor.
+
+    .form-section
+      .container
+        .form-card
+          .form-header
+            h2 Registrar Venda
+
+          form.product-form(method="POST", action="/venda-combustivel", id="venda-form")
+            
+            //- 1. SELEÇÃO DE COMBUSTÍVEL
+            .form-group
+              label.form-label Combustível
+              select.form-input(name="combustivel_id", id="select-combustivel", required)
+                option(value="") -- Selecione --
+                each c in combustiveis
+                  //- Guardamos o preço e o alerta no próprio 'option'
+                  option(
+                    value=c.id, 
+                    data-preco=c.preco_por_litro, 
+                    data-alerta=c.estoqueBaixo
+                  )= c.nome + ` (R$ ${parseFloat(c.preco_por_litro).toFixed(3)}/L)`
+            
+            //- ALERTA DE ESTOQUE (só aparece se o estoque estiver baixo)
+            #alerta-estoque.form-group(style="display: none;")
+              p(style="color: #dc3545; font-weight: bold; text-align: center;") 
+                | ⚠️ ATENÇÃO: Estoque baixo para este combustível!
+            
+            //- 2. OS DOIS CAMPOS (REAIS E LITROS)
+            .form-group
+              label.form-label Valor (R$)
+              input.form-input(type="number", step="0.01", name="valor_reais", id="input-reais", placeholder="Ex: 50.00")
+              
+            .form-group
+              label.form-label Litros (L)
+              input.form-input(type="number", step="0.01", name="valor_litros", id="input-litros", placeholder="Ex: 10.00")
+
+            .form-actions
+              button.btn-primary(type="submit") Registrar Venda
+
+  //- *** O JAVASCRIPT MÁGICO ***
+  //- Este script roda no navegador do frentista
+  script.
+    // Pega os elementos
+    const selectCombustivel = document.getElementById('select-combustivel');
+    const inputReais = document.getElementById('input-reais');
+    const inputLitros = document.getElementById('input-litros');
+    const alertaEstoque = document.getElementById('alerta-estoque');
+    
+    let precoLitroAtual = 0;
+
+    // Quando o frentista ESCOLHE o combustível
+    selectCombustivel.addEventListener('change', (e) => {
+      const selectedOption = e.target.options[e.target.selectedIndex];
+      precoLitroAtual = parseFloat(selectedOption.getAttribute('data-preco')) || 0;
+      
+      // Mostra ou esconde o alerta
+      if (selectedOption.getAttribute('data-alerta') === 'true') {
+        alertaEstoque.style.display = 'block';
+      } else {
+        alertaEstoque.style.display = 'none';
+      }
+      
+      // Limpa os campos
+      inputReais.value = '';
+      inputLitros.value = '';
+    });
+
+    // Quando o frentista DIGITA em REAIS
+    inputReais.addEventListener('input', (e) => {
+      if (!precoLitroAtual) return;
+      const reais = parseFloat(e.target.value) || 0;
+      
+      // Converte para Litros
+      const litros = reais / precoLitroAtual;
+      inputLitros.value = litros.toFixed(2); // Arredonda para 2 casas
+    });
+
+    // Quando o frentista DIGITA em LITROS
+    inputLitros.addEventListener('input', (e) => {
+      if (!precoLitroAtual) return;
+      const litros = parseFloat(e.target.value) || 0;
+      
+      // Converte para Reais
+      const reais = litros * precoLitroAtual;
+      inputReais.value = reais.toFixed(2); // Arredonda para 2 casas
+    });
