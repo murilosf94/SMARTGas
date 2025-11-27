@@ -1,0 +1,94 @@
+extends ../layout
+
+block content
+  .container
+    .form-hero
+      .hero-overlay
+      .hero-content
+        .hero-text
+          h1 Finalizar Pagamento
+          p.hero-description Escolha como deseja pagar.
+
+    .form-section
+      .container
+        .form-card
+          .form-header
+            h2 Total a Pagar: 
+            h1(style="color: #4CAF50; font-size: 2.5rem;") R$ #{total}
+          
+          .card-content
+            //- Este formulário envia para o checkout final
+            form(method="POST", action='/carrinho/' + id_cliente + '/checkout', id="form-pagamento")
+              
+              //- Grid de opções de pagamento
+              .payment-options(style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;")
+                
+                //- Opção 1: Dinheiro
+                label.payment-card
+                  input(type="radio", name="metodo_pagamento", value="dinheiro", checked)
+                  .card-inner
+                    span.icon 💵
+                    span Dinheiro
+                
+                //- Opção 2: App / QR Code (A INOVAÇÃO DA US-02)
+                label.payment-card
+                  input(type="radio", name="metodo_pagamento", value="pix_app")
+                  .card-inner
+                    span.icon 📱
+                    span App SmartGas (QR Code)
+                
+                //- Opção 3: Crédito
+                label.payment-card
+                  input(type="radio", name="metodo_pagamento", value="credito")
+                  .card-inner
+                    span.icon 💳
+                    span Cartão de Crédito
+                
+                //- Opção 4: Débito
+                label.payment-card
+                  input(type="radio", name="metodo_pagamento", value="debito")
+                  .card-inner
+                    span.icon 💳
+                    span Cartão de Débito
+
+              .form-actions
+                button.btn-primary(type="submit", style="width: 100%; font-size: 1.2rem;") 
+                  | Confirmar Pagamento
+
+  //- CSS simples para os cartões de seleção
+  style.
+    .payment-card input { display: none; } /* Esconde a bolinha do radio */
+    
+    .payment-card .card-inner {
+      border: 2px solid #444; /* Borda escura padrão */
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #222; /* Fundo escuro */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      
+      /* [CORREÇÃO] Texto Branco */
+      color: #fff; 
+      font-weight: 500;
+    }
+    
+    .payment-card .icon { font-size: 2rem; }
+    
+    /* Quando selecionado */
+    .payment-card input:checked + .card-inner {
+      border-color: #4CAF50; /* Borda Verde ao selecionar */
+      background-color: #1a3320; /* Fundo esverdeado escuro */
+      box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+      color: #fff; /* Garante texto branco selecionado */
+    }
+    
+    /* Efeito hover para ficar legal */
+    .payment-card:hover .card-inner {
+      border-color: #666;
+      background-color: #333;
+    }

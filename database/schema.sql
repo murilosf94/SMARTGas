@@ -201,3 +201,8 @@ ALTER TABLE combustiveis
   
   FOREIGN KEY (combustivel_id) REFERENCES combustiveis(id)
 );
+
+
+
+ALTER TABLE vendas
+ADD COLUMN metodo_pagamento ENUM('dinheiro', 'credito', 'debito', 'pix_app') NOT NULL DEFAULT 'dinheiro';

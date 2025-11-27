@@ -27,7 +27,17 @@ router.post('/:id/checkout', carrinhoController.checkoutCarrinho);
 
 router.post('/remover/:id/:id2', carrinhoController.removerItem);
 
+
+// routes/carrinho.js
+
+// ... (outras rotas) ...
+
+// 1. [NOVA ROTA] GET para ver a tela de pagamento
+router.get('/:id/pagamento', carrinhoController.telaPagamento);
+
+// 2. [ROTA ATUALIZADA] O POST do checkout continua o mesmo, 
+// mas agora ele será chamado pela tela de pagamento, não pelo carrinho direto.
+router.post('/:id/checkout', carrinhoController.checkoutCarrinho);
+
 module.exports = router;
 
-// 4. Exporte o router
-module.exports = router;

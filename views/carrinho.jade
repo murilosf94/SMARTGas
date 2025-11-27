@@ -25,8 +25,7 @@ block content
                   .product-quantity
                     strong Quantidade: 1
                   
-                  //- --- [ INÍCIO DA MUDANÇA ] ---
-                  //- Adicionamos 'display: flex' para alinhar os botões
+                  //- --- Ações do Produto ---
                   .product-actions(style="display: flex; gap: 10px;")
                     
                     //- Botão Comprar (Form 1)
@@ -34,11 +33,8 @@ block content
                       button.btn-buy(type="submit") Comprar
                     
                     //- Botão Remover (Form 2)
-                    //- Envia para a nova rota '/remover'
                     form(method="POST", action='/carrinho/remover/' + p.id + '/' + c.id_usuario, style="margin:0;")
-                      //- Usa a classe 'btn-delete' (vermelho) que já temos
                       button.btn-delete(type="submit") Remover
-                  //- --- [ FIM DA MUDANÇA ] ---
       
       //- --- Seção de Checkout ---
       if carrinho && carrinho.length > 0
@@ -55,9 +51,11 @@ block content
           h3.total-price(style="font-size: 1.5rem; color: #4CAF50; margin-bottom: 25px;") 
             | Total: R$ #{total.toFixed(2)}
           
-          form(method="POST", action='/carrinho/' + carrinho[0].id_usuario + '/checkout')
-            button.btn-primary(type="submit", style="width: 100%; padding: 15px; font-size: 1.2rem;")
-              | Finalizar Venda (Comprar Carrinho Inteiro)
+          //- --- [INÍCIO DA CORREÇÃO] ---
+          //- Botão que leva para a nova tela de Seleção de Pagamento (GET)
+          a.btn-primary(href='/carrinho/' + carrinho[0].id_usuario + '/pagamento', style="display: block; text-align: center; width: 100%; padding: 15px; font-size: 1.2rem; text-decoration: none;")
+            | Ir para Pagamento
+          //- --- [FIM DA CORREÇÃO] ---
       
       else
         .empty-state
