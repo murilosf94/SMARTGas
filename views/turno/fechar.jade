@@ -2,57 +2,74 @@ extends ../layout
 
 block content
   .container
-    //- Bloco 1: Hero
     .form-hero
-      .hero-overlay
       .hero-content
         .hero-text
           h1 Fechar Turno
-          p.hero-description Confira o resumo do turno e informe o valor final no caixa.
+          p Confira os valores por forma de pagamento e informe o saldo em dinheiro.
 
-    //- Bloco 2: O Card do Relatório e Formulário
     .form-section
       .container
         .form-card
-          
-          //- O Relatório (Dados vêm do controller)
           .form-header
-            h2 Resumo do Turno
+            h2 Resumo Financeiro do Turno
           
           .card-content(style="padding-top: 20px; padding-bottom: 20px;")
-            //- Estilo para o relatório
             style.
-              .report-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #444; }
-              .report-item span { font-size: 1.1rem; }
-              .report-item .value { font-weight: bold; }
-              .report-item .total { color: #4CAF50; font-size: 1.3rem; }
-              .report-item .negative .value { color: #dc3545; } //- [CSS ADICIONADO]
+              .report-group { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+              .report-item { display: flex; justify-content: space-between; padding: 5px 0; font-size: 1rem; color: #ccc; }
+              .report-item.highlight { color: #fff; font-weight: bold; font-size: 1.1rem; }
+              .report-item.sub-item { padding-left: 20px; font-size: 0.95rem; color: #999; }
+              .report-item .value { font-family: monospace; }
+              .val-pos { color: #4CAF50; }
+              .val-neg { color: #dc3545; }
+              .val-neutral { color: #ffc107; }
 
-            .report-item
-              span Valor Inicial (Troco):
-              span.value R$ #{valorInicial}
-            .report-item
-              span Total de Vendas no Turno:
-              span.value R$ #{totalVendas}
-            
-            //- [LINHA ADICIONADA]
-            //- Mostra o total de despesas (que vem do controller)
-            .report-item.negative
-              span Total de Despesas no Turno:
-              span.value - R$ #{totalDespesas}
+            //- GRUPO 1: VENDAS TOTAIS
+            .report-group
+              .report-item.highlight
+                span Total Bruto de Vendas:
+                span.value R$ #{vendas.total}
               
-            .report-item.total
-              span Valor Esperado na Gaveta:
-              span.value.total R$ #{valorEsperado}
+              //- Aqui está o detalhamento que você pediu
+              .report-item.sub-item
+                span 💵 Dinheiro:
+                span.value R$ #{vendas.dinheiro}
+              .report-item.sub-item
+                span 💳 Cartão Crédito:
+                span.value R$ #{vendas.credito}
+              .report-item.sub-item
+                span 💳 Cartão Débito:
+                span.value R$ #{vendas.debito}
+              .report-item.sub-item
+                span 📱 Pix / App:
+                span.value R$ #{vendas.pix_app}
+
+            //- GRUPO 2: CAIXA FÍSICO (GAVETA)
+            .report-group
+              .report-item
+                span (+) Fundo de Troco Inicial:
+                span.value R$ #{valorInicial}
+              .report-item
+                span (+) Vendas em Dinheiro:
+                span.value R$ #{vendas.dinheiro}
+              .report-item.val-neg
+                span (-) Despesas/Sangrias:
+                span.value - R$ #{totalDespesas}
+              
+              div(style="margin-top: 10px; border-top: 1px dashed #555; padding-top: 10px;")
+                .report-item.highlight
+                  span 🟢 Esperado na Gaveta (Dinheiro):
+                  span.value.val-pos R$ #{valorEsperado}
 
           //- O Formulário para fechar
           form.product-form(method="POST", action="/turno/fechar")
             
             .form-group
-              label.form-label Valor Final Contado (R$)
+              label.form-label Valor Contado em Dinheiro (R$)
               input.form-input(type="number", step="0.01", name="valor_final", placeholder="0,00", required, autofocus)
               .file-hint(style="color: #999; margin-top: 8px;")
-                | Informe o valor total que você contou na gaveta (incluindo o troco).
+                | Conte apenas as notas e moedas físicas. Não inclua comprovantes de cartão.
 
             .form-actions
               a.btn-cancel(href="/") Cancelar

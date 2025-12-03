@@ -23,6 +23,11 @@ router.get('/:id/edit', upload.single('image'), ctrl.edit);
 router.put('/:id',      upload.single('image'), ctrl.update);
 router.delete('/:id',   ctrl.destroy);
 
+router.get('/:id/edit', upload.single('image'), ctrl.edit);
+router.put('/:id',      upload.single('image'), ctrl.update);
+
+router.post('/:id/insumo', ctrl.addInsumo);
+
 
 
 module.exports = router;

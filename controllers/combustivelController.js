@@ -17,19 +17,17 @@ exports.index = async (req, res, next) => {
   }
 };
 
-// ATUALIZA PREÇO, ADICIONA ESTOQUE OU REMOVE ESTOQUE
-// ATUALIZA PREÇO, ESTOQUE, REMOÇÃO E PROMOÇÃO
+// ATUALIZA PREÇO, CUSTO, ESTOQUE, REMOÇÃO, PROMOÇÃO E MANUTENÇÃO
 exports.update = async (req, res, next) => {
   try {
     console.log('DADOS RECEBIDOS DO FORMULÁRIO:', req.body);
     
     const { id } = req.params;
     
-    // --- [INÍCIO DA CORREÇÃO] ---
     // 1. Pega TODOS os campos possíveis do body EM UM SÓ LUGAR.
-    //    Isso garante que 'limite_manutencao_litros' seja definido.
     let { 
       preco_por_litro, 
+      custo_por_litro, // <--- [NOVO]
       adicionar_litros, 
       remover_litros,
       preco_promocional, 
@@ -37,26 +35,34 @@ exports.update = async (req, res, next) => {
       promo_hora_inicio,
       promo_hora_fim,
       promo_dias_semana,
-      limite_manutencao_litros // <-- Variável que faltava
+      limite_manutencao_litros
     } = req.body;
-    // --- [FIM DA CORREÇÃO] ---
 
-    // 2. Lógica de Correção de Vírgula (para os campos numéricos)
+    // 2. Lógica de Correção de Vírgula
     if (preco_por_litro) { preco_por_litro = (preco_por_litro || '').replace(',', '.'); }
+    if (custo_por_litro) { custo_por_litro = (custo_por_litro || '').replace(',', '.'); } // [NOVO]
     if (adicionar_litros) { adicionar_litros = (adicionar_litros || '').replace(',', '.'); }
     if (remover_litros) { remover_litros = (remover_litros || '').replace(',', '.'); }
     if (preco_promocional) { preco_promocional = (preco_promocional || '').replace(',', '.'); }
     if (limite_manutencao_litros) { limite_manutencao_litros = (limite_manutencao_litros || '').replace(',', '.'); }
     
-    // 3. Lógica de Estoque/Preço
-    if (preco_por_litro && preco_por_litro.length > 0) {
-      console.log('ATUALIZANDO PREÇO...');
-      await pool.execute(
-        "UPDATE combustiveis SET preco_por_litro = ? WHERE id = ?",
-        [preco_por_litro, id]
-      );
+    // 3. Atualizar Preço e Custo
+    // (Agora verificamos ambos os campos)
+    if ((preco_por_litro && preco_por_litro.length > 0) || (custo_por_litro && custo_por_litro.length > 0)) {
+      console.log('ATUALIZANDO PREÇOS/CUSTOS...');
+      
+      // Se um dos campos não foi enviado, mantemos o valor atual do banco (precisaria de uma query select antes),
+      // mas para simplificar aqui, vamos assumir que o form envia ambos ou atualizamos individualmente.
+      // A melhor forma simples:
+      if (preco_por_litro) {
+        await pool.execute("UPDATE combustiveis SET preco_por_litro = ? WHERE id = ?", [preco_por_litro, id]);
+      }
+      if (custo_por_litro) {
+        await pool.execute("UPDATE combustiveis SET custo_por_litro = ? WHERE id = ?", [custo_por_litro, id]);
+      }
     }
     
+    // 4. Lógica de Estoque
     if (adicionar_litros && parseFloat(adicionar_litros) > 0) {
       console.log('ADICIONANDO ESTOQUE...');
       await pool.execute(
@@ -73,9 +79,7 @@ exports.update = async (req, res, next) => {
       );
     }
     
-    // 4. Lógica de Salvar a Promoção
-    // (Verifica se 'preco_promocional' foi enviado, o que o diferencia
-    // dos outros formulários)
+    // 5. Lógica de Promoção
     if (preco_promocional !== undefined) {
       console.log('ATUALIZANDO PROMOÇÃO...');
       const isAtivo = (promo_ativo === 'on') ? 1 : 0;
@@ -98,13 +102,12 @@ exports.update = async (req, res, next) => {
       );
     }
 
-    // 5. Lógica de Salvar o Limite de Manutenção
-    // (Esta é a linha 91 que deu o erro. Agora 'limite_manutencao_litros' está definido)
+    // 6. Lógica de Limite de Manutenção
     if (limite_manutencao_litros !== undefined) {
       console.log('ATUALIZANDO LIMITE DE MANUTENÇÃO...');
       await pool.execute(
         `UPDATE combustiveis SET limite_manutencao_litros = ? WHERE id = ?`,
-        [ (limite_manutencao_litros || 10000), id ] // (Default de 10000 se ficar vazio)
+        [ (limite_manutencao_litros || 10000), id ]
       );
     }
     

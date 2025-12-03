@@ -15,7 +15,7 @@ block content
               .form-subtitle Atualize os dados do produto abaixo
             
             .form-content
-              //- CORREÇÃO: 'action' corrigido para sintaxe Jade
+              //- === FORMULÁRIO PRINCIPAL (Edição do Produto) ===
               form.product-form(method='POST', action='/products/' + product.id + '?_method=PUT', enctype="multipart/form-data")
                 input(type="hidden", name="currentImageUrl", value=product.imageUrl)
                 
@@ -38,25 +38,21 @@ block content
                     label.form-label(for="stock") Estoque
                     input.form-input(type='number', name='stock', id="stock", value=product.stock, placeholder="Quantidade disponível")
                   
-                  //- --- INÍCIO DA MELHORIA DE UX ---
+                  //- Melhoria de UX para imagem
                   .form-group.full-width
-                  //- Usamos a tag <details> para esconder o campo opcional
-                  details.file-details
-                    //- Este é o "título" que o usuário clica
-                    summary.file-summary
-                      span 📷
-                      | Trocar a imagem do produto
-                    
-                    //- Este é o conteúdo que aparece ao clicar
-                    .file-upload-wrapper(style="margin-top: 15px;")
-                      label.form-label(for="image") Selecione o novo arquivo:
-                      input.file-input(type="file", name="image", id="image", accept="image/*")
-                      label.file-label(for="image")
-                        span.file-icon 📁
-                        span.file-text Escolher novo arquivo...
-                      .file-hint(style="color: #999; margin-top: 8px;")
-                        | Se nenhum arquivo for escolhido, a imagem atual será mantida.
-                  //- --- FIM DA MELHORIA DE UX ---
+                    details.file-details
+                      summary.file-summary
+                        span 📷
+                        | Trocar a imagem do produto
+                      
+                      .file-upload-wrapper(style="margin-top: 15px;")
+                        label.form-label(for="image") Selecione o novo arquivo:
+                        input.file-input(type="file", name="image", id="image", accept="image/*")
+                        label.file-label(for="image")
+                          span.file-icon 📁
+                          span.file-text Escolher novo arquivo...
+                        .file-hint(style="color: #999; margin-top: 8px;")
+                          | Se nenhum arquivo for escolhido, a imagem atual será mantida.
                 
                 .form-actions
                   button.btn-cancel(type="button", onclick="history.back()")
@@ -65,6 +61,57 @@ block content
                   button.btn-save(type='submit')
                     span.btn-icon 💾
                     span Salvar Alterações
+
+              //- === NOVA SEÇÃO: GESTÃO DE INSUMOS (US-07) ===
+              //- Separador visual
+              hr(style="margin: 30px 0; border-color: #ddd;")
+              
+              div.insumos-container
+                //- [CORREÇÃO] Cores alteradas para #333 (Preto/Cinza Escuro) para leitura em fundo branco
+                h3(style="margin-bottom: 10px; color: #333;") Composição (Baixa Automática)
+                p(style="color: #666; font-size: 0.9em; margin-bottom: 20px;") 
+                  | Se este produto for um SERVIÇO (ex: Troca de Óleo), adicione os insumos que serão gastos automaticamente do estoque ao realizar a venda.
+
+                //- Tabela de Insumos já cadastrados
+                if insumosAtuais && insumosAtuais.length > 0
+                  table(style="width: 100%; border-collapse: collapse; margin-bottom: 25px;")
+                    thead
+                      tr(style="text-align: left; border-bottom: 1px solid #ddd;")
+                        //- [CORREÇÃO] Textos da tabela em preto
+                        th(style="padding: 8px; color: #000; font-weight: bold;") Insumo
+                        th(style="padding: 8px; color: #000; font-weight: bold;") Qtd Baixa
+                        th(style="padding: 8px; color: #000; font-weight: bold;") Estoque Atual
+                    tbody
+                      each insumo in insumosAtuais
+                        tr(style="border-bottom: 1px solid #eee;")
+                          td(style="padding: 8px; color: #333;")= insumo.name
+                          td(style="padding: 8px; color: #333;")= insumo.quantidade
+                          td(style="padding: 8px; color: #333;")= insumo.stock
+                else
+                  p(style="color: #666; font-style: italic; margin-bottom: 20px;") Nenhum insumo vinculado a este produto.
+
+                //- Formulário SECUNDÁRIO para adicionar novo insumo
+                //- [CORREÇÃO] Fundo alterado para cinza claro (#f8f9fa) e textos para preto
+                form(method="POST", action='/products/' + product.id + '/insumo', style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #ddd;")
+                  h4(style="margin-bottom: 15px; color: #333; font-size: 1em; font-weight: bold;") Adicionar Novo Ingrediente
+                  
+                  div(style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;")
+                    .form-group(style="flex: 2; min-width: 200px; margin-bottom: 0;")
+                      label.form-label(style="margin-bottom: 8px; display: block; color: #333;") Escolher Produto
+                      //- [CORREÇÃO] Input normalizado (fundo branco, texto preto)
+                      select.form-input(name="insumo_id", style="width: 100%; height: 42px; background-color: #fff; color: #333; border: 1px solid #ccc;")
+                        if todosProdutos
+                          each p in todosProdutos
+                            if p.id != product.id
+                              option(value=p.id) #{p.name} (Disp: #{p.stock})
+                    
+                    .form-group(style="flex: 1; min-width: 100px; margin-bottom: 0;")
+                      label.form-label(style="margin-bottom: 8px; display: block; color: #333;") Quantidade
+                      input.form-input(type="number", name="quantidade", step="0.001", value="1", style="width: 100%; height: 42px; background-color: #fff; color: #333; border: 1px solid #ccc;")
+                    
+                    .form-group(style="margin-bottom: 0;")
+                      button.btn-save(type="submit", style="height: 42px; display: flex; align-items: center; justify-content: center; padding: 0 20px; margin-top: 0;") 
+                        span + Adicionar
 
         aside.edit-sidebar
           .sidebar-card
@@ -92,7 +139,6 @@ block content
               h3 Ações Rápidas
             .sidebar-content
               .category-list
-                //- CORREÇÃO: 'href' corrigido para sintaxe Jade
                 a.category-item(href='/products/' + product.id)
                   span.category-icon 👁️
                   span Ver Produto

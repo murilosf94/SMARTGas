@@ -206,3 +206,23 @@ ALTER TABLE combustiveis
 
 ALTER TABLE vendas
 ADD COLUMN metodo_pagamento ENUM('dinheiro', 'credito', 'debito', 'pix_app') NOT NULL DEFAULT 'dinheiro';
+
+-- 1. Adicionar o Custo de Compra aos combustíveis
+ALTER TABLE combustiveis
+ADD COLUMN custo_por_litro DECIMAL(10, 3) NOT NULL DEFAULT 0.000;
+
+-- 2. Adicionar a Quantidade (Litros/Unidades) na tabela de vendas
+-- (Isso é essencial para saber o volume vendido em cada transação)
+ALTER TABLE vendas
+ADD COLUMN quantidade DECIMAL(10, 3) NOT NULL DEFAULT 0.000;
+
+
+CREATE TABLE servico_insumos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    servico_id INT NOT NULL,  -- O ID do Serviço (Ex: Troca de Óleo)
+    insumo_id INT NOT NULL,   -- O ID do Produto gasto (Ex: Óleo 15W40)
+    quantidade DECIMAL(10, 3) NOT NULL, -- Quanto gasta (Ex: 4.0)
+    
+    FOREIGN KEY (servico_id) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (insumo_id) REFERENCES products(id) ON DELETE CASCADE
+);

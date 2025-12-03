@@ -262,16 +262,18 @@ exports.telaPagamento = async (req, res, next) => {
 
 // 2. [ATUALIZAÇÃO] O seu checkoutCarrinho agora recebe o método
 exports.checkoutCarrinho = async (req, res, next) => {
+  const connection = await pool.getConnection(); // Usaremos conexão dedicada para transação
   try {
     const id_cliente = req.params.id; 
     const id_frentista = req.session.usuario.id;
     const id_turno = req.session.turno_id;
-    
-    // <-- [MUDANÇA] Pegamos o método do formulário
     const { metodo_pagamento } = req.body; 
 
-    const [itensDoCarrinho] = await pool.query(
-      `SELECT c.id_products, p.price, p.stock, p.name
+    // Inicia transação (segurança para não dar erro no meio do caminho)
+    await connection.beginTransaction();
+
+    const [itensDoCarrinho] = await connection.query(
+      `SELECT c.id_products, c.id_usuario, p.price, p.name
        FROM carrinho c
        JOIN products p ON c.id_products = p.id
        WHERE c.id_usuario = ?`,
@@ -279,41 +281,59 @@ exports.checkoutCarrinho = async (req, res, next) => {
     );
 
     if (itensDoCarrinho.length === 0) {
+      await connection.release();
       return res.redirect('/carrinho/' + id_cliente);
     }
 
-    // (Lógica de verificação de estoque continua igual...)
+    // Processa a venda item por item
     for (const item of itensDoCarrinho) {
-      if (item.stock <= 0) {
-        return res.status(400).send(`Produto "${item.name}" sem estoque!`);
-      }
-    }
-
-    // Processa a venda
-    for (const item of itensDoCarrinho) {
-      // <-- [MUDANÇA] Inserimos o metodo_pagamento no banco
-      await pool.execute(
+      
+      // 1. Registra a venda na tabela 'vendas'
+      await connection.execute(
         `INSERT INTO vendas 
           (frentista_id, cliente_id, produto_id, valor_venda, turno_id, metodo_pagamento) 
          VALUES (?, ?, ?, ?, ?, ?)`,
         [id_frentista, id_cliente, item.id_products, item.price, id_turno, metodo_pagamento]
       );
 
-      await pool.execute(
-        `UPDATE products SET stock = stock - 1 WHERE id = ?`,
+      // 2. VERIFICAÇÃO DE INSUMOS (A Mágica da US-07)
+      // Verifica se este produto é um "Serviço" que consome outros produtos
+      const [insumos] = await connection.query(
+        'SELECT * FROM servico_insumos WHERE servico_id = ?', 
         [item.id_products]
       );
+
+      if (insumos.length > 0) {
+        // CENÁRIO A: É um serviço (Ex: Troca de Óleo)
+        // Não baixamos o estoque do serviço, baixamos os insumos vinculados
+        for (let insumo of insumos) {
+           await connection.execute(
+             'UPDATE products SET stock = stock - ? WHERE id = ?',
+             [insumo.quantidade, insumo.insumo_id]
+           );
+        }
+      } else {
+        // CENÁRIO B: É um produto normal (Ex: Coca Cola ou Litro de Óleo avulso)
+        // Baixa o estoque dele mesmo
+        await connection.execute(
+          'UPDATE products SET stock = stock - 1 WHERE id = ?',
+          [item.id_products]
+        );
+      }
     }
 
-    await pool.execute('DELETE FROM carrinho WHERE id_usuario = ?', [id_cliente]);
+    // Limpa o carrinho
+    await connection.execute('DELETE FROM carrinho WHERE id_usuario = ?', [id_cliente]);
 
-    // <-- [MUDANÇA] Se for Pix/App, poderiamos mostrar um QR Code fake aqui
-    // Mas por enquanto, vamos direto para o sucesso
+    await connection.commit(); // Salva tudo
     res.render('comprado'); 
 
   } catch (err) {
+    await connection.rollback(); // Desfaz se der erro
     console.error(err);
     next(err);
+  } finally {
+    connection.release(); // Libera a conexão
   }
 };
 

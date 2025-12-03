@@ -59,14 +59,76 @@ exports.create = async (req, res, next) => {
 };
 
 
+// ATUALIZE esta função existente
 exports.edit = async (req, res, next) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT * FROM products WHERE id = ?',
-      [req.params.id]
-    );
+    // 1. Busca o produto principal
+    const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [req.params.id]);
     if (rows.length === 0) return res.status(404).send('Produto não encontrado');
-    res.render('products/edit', { product: rows[0] });
+
+    // 2. Busca todos os produtos (para preencher o select de insumos)
+    const [todosProdutos] = await pool.query('SELECT id, name, stock FROM products ORDER BY name ASC');
+
+    // 3. Busca os insumos JÁ cadastrados para este serviço
+    const [insumosAtuais] = await pool.query(
+      `SELECT si.id, si.quantidade, p.name, p.stock 
+       FROM servico_insumos si
+       JOIN products p ON si.insumo_id = p.id
+       WHERE si.servico_id = ?`, 
+       [req.params.id]
+    );
+
+    res.render('products/edit', { 
+      product: rows[0], 
+      todosProdutos, 
+      insumosAtuais 
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ATUALIZE esta função existente
+exports.edit = async (req, res, next) => {
+  try {
+    // 1. Busca o produto principal
+    const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).send('Produto não encontrado');
+
+    // 2. Busca todos os produtos (para preencher o select de insumos)
+    const [todosProdutos] = await pool.query('SELECT id, name, stock FROM products ORDER BY name ASC');
+
+    // 3. Busca os insumos JÁ cadastrados para este serviço
+    const [insumosAtuais] = await pool.query(
+      `SELECT si.id, si.quantidade, p.name, p.stock 
+       FROM servico_insumos si
+       JOIN products p ON si.insumo_id = p.id
+       WHERE si.servico_id = ?`, 
+       [req.params.id]
+    );
+
+    res.render('products/edit', { 
+      product: rows[0], 
+      todosProdutos, 
+      insumosAtuais 
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ADICIONE esta nova função no final do arquivo
+exports.addInsumo = async (req, res, next) => {
+  try {
+    const servico_id = req.params.id;
+    const { insumo_id, quantidade } = req.body;
+
+    await pool.execute(
+      'INSERT INTO servico_insumos (servico_id, insumo_id, quantidade) VALUES (?, ?, ?)',
+      [servico_id, insumo_id, quantidade]
+    );
+    
+    res.redirect('/products/' + servico_id + '/edit');
   } catch (err) {
     next(err);
   }

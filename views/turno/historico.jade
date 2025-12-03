@@ -1,69 +1,76 @@
 extends ../layout
 
 block content
-  //- [OPCIONAL] CSS para colorir os números
+  //- Estilos auxiliares para os valores
   style.
-    .valor-positivo { color: #4CAF50; }
-    .valor-negativo { color: #dc3545; }
-    .valor-aberto { color: #ffc107; font-style: italic; }
+    .valor-positivo { color: #28a745; font-weight: bold; }
+    .valor-negativo { color: #dc3545; font-weight: bold; }
+    .valor-neutro { color: #555; }
+    .valor-aberto { color: #ffc107; font-weight: bold; font-style: italic; background: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;}
+    .product-table td { border-bottom: 1px solid #ddd; }
 
   .container
-    //- Bloco 1: Hero
     .form-hero
-      .hero-overlay
       .hero-content
         .hero-text
           h1 Histórico de Turnos
-          p.hero-description Veja todos os turnos abertos e fechados.
+          p Relatório detalhado para conciliação financeira.
 
-    //- Bloco 2: O Card da Tabela
     .form-section
       .container
         .form-card
           .form-header
             h2 Relatório Completo
           
-          .card-content(style="padding-bottom: 20px;")
+          .card-content(style="padding-bottom: 20px; overflow-x: auto;")
             
             if turnos && turnos.length > 0
-              table.product-table
+              table.product-table(style="width: 100%; border-collapse: collapse;")
                 thead
                   tr
-                    th Frentista
-                    th Abertura
-                    th Status
-                    th Vendas (+)
-                    th Despesas (-)
-                    th Esperado (=)
-                    th Contado (Final)
-                    th Diferença
+                    //- [CORREÇÃO DEFINITIVA]
+                    //- Apliquei 'background-color: #333' e 'color: #ffffff' DIRETAMENTE em cada TH.
+                    //- Isso garante que nenhum outro CSS sobrescreva a cor branca.
+                    
+                    th(style="padding: 12px; text-align: left; background-color: #333; color: #ffffff;") Data/Frentista
+                    th(style="padding: 12px; text-align: left; background-color: #333; color: #ffffff;") Dinheiro (Venda)
+                    th(style="padding: 12px; text-align: left; background-color: #333; color: #ffffff;") Cartões
+                    th(style="padding: 12px; text-align: left; background-color: #333; color: #ffffff;") Pix/App
+                    th(style="padding: 12px; text-align: left; background-color: #333; color: #ffffff;") Despesas
+                    th(style="padding: 12px; text-align: left; background-color: #333; color: #ffffff;") Gaveta (Esp. / Real)
+                    th(style="padding: 12px; text-align: left; background-color: #333; color: #ffffff;") Quebra de Caixa
                 tbody
                   each t in turnos
                     tr
-                      td(data-label="Frentista")= t.frentista_nome
-                      td(data-label="Abertura")= new Date(t.data_abertura).toLocaleString('pt-BR')
+                      td(style="padding: 12px;")
+                        div(style="font-weight: bold; color: #333;")= t.frentista_nome
+                        div(style="font-size: 0.85em; color: #666;")= new Date(t.data_abertura).toLocaleDateString('pt-BR')
+                        if t.status === 'aberto'
+                           span.valor-aberto Aberto
                       
-                      //- Status: "Fechado" ou "Aberto" (em amarelo)
-                      if t.status === 'fechado'
-                        td(data-label="Status") Fechado
-                      else
-                        td.valor-aberto(data-label="Status") Aberto
+                      td.valor-positivo(style="padding: 12px;") R$ #{t.vDinheiro}
+                      td(style="padding: 12px; color: #0056b3; font-weight: bold;") R$ #{t.vCartao}
+                      td(style="padding: 12px; color: #6f42c1; font-weight: bold;") R$ #{t.vPix}
                       
-                      td.valor-positivo(data-label="Vendas") R$ #{t.totalVendas}
-                      td.valor-negativo(data-label="Despesas") - R$ #{t.totalDespesas}
+                      td.valor-negativo(style="padding: 12px;") - R$ #{t.totalDespesas}
                       
-                      //- Totais
-                      td(data-label="Esperado") R$ #{t.valorEsperado}
-                      td(data-label="Contado") R$ #{t.valorFinal}
+                      td(style="padding: 12px;")
+                        div(style="font-size: 0.9em; color: #666;") Esp: R$ #{t.valorEsperado}
+                        if t.status === 'fechado'
+                          div(style="font-weight: bold; color: #333;") Real: R$ #{t.valorFinal}
+                        else
+                          div -
 
-                      //- Lógica da Diferença
-                      if t.diferenca > 0
-                        td.valor-positivo(data-label="Diferença") +R$ #{t.diferenca}
-                      else if t.diferenca < 0
-                        td.valor-negativo(data-label="Diferença") -R$ #{Math.abs(t.diferenca).toFixed(2)}
+                      if t.status === 'fechado'
+                        if t.diferenca > 0
+                          td.valor-positivo(style="padding: 12px;") +R$ #{t.diferenca} (Sobra)
+                        else if t.diferenca < 0
+                          td.valor-negativo(style="padding: 12px;") -R$ #{Math.abs(t.diferenca).toFixed(2)} (Falta)
+                        else
+                          td.valor-neutro(style="padding: 12px;") OK
                       else
-                        td(data-label="Diferença") R$ 0.00
+                        td(style="padding: 12px;") -
             
             else
-              .empty-state
+              .empty-state(style="padding: 20px; text-align: center; color: #666;")
                 h3 Nenhum turno foi registrado ainda.

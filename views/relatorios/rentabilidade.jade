@@ -1,0 +1,104 @@
+extends ../layout
+
+block content
+  .container
+    .form-hero
+      .hero-content
+        .hero-text
+          h1= titulo
+          p Visualize graficamente o desempenho de cada combustível.
+
+    .form-section
+      .container
+        //- Área do Gráfico
+        .form-card(style="padding: 20px;")
+          canvas#rentabilidadeChart(width="400", height="200")
+        
+        div(style="text-align: center; margin-top: 30px;")
+          a.btn-delete(href="/relatorios", style="background-color: #666; text-decoration: none;") Voltar ao Menu
+
+  //- Importando a biblioteca Chart.js (CDN)
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+
+  //- Script para renderizar o gráfico
+  script.
+    // Recupera o contexto do canvas
+    const ctx = document.getElementById('rentabilidadeChart').getContext('2d');
+
+    // Injeta os dados vindos do Controller com proteção contra falhas
+    // O '|| "[]"' garante que se vier vazio, cria uma lista vazia e não dá erro de sintaxe
+    const labels = !{labels || '[]'};
+    const dadosReceita = !{receita || '[]'};
+    const dadosCusto = !{custo || '[]'};
+    const dadosLucro = !{lucro || '[]'};
+
+    // Verificação no console para ajudar a debugar
+    if (labels.length === 0) {
+      console.warn("Nenhum dado recebido. Verifique se há vendas de combustível no banco de dados.");
+    }
+
+    // Cria o gráfico
+    new Chart(ctx, {
+      type: 'bar', // Tipo barra vertical
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Faturamento (R$)',
+            data: dadosReceita,
+            backgroundColor: 'rgba(54, 162, 235, 0.6)', // Azul
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          },
+          {
+            label: 'Custo Total (R$)',
+            data: dadosCusto,
+            backgroundColor: 'rgba(255, 99, 132, 0.6)', // Vermelho
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          },
+          {
+            label: 'Lucro (R$)',
+            data: dadosLucro,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)', // Verde
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Comparativo Financeiro por Combustível'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                // Formata o tooltip para dinheiro (R$)
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed.y);
+                }
+                return label;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              // Formata o eixo Y para dinheiro
+              callback: function(value, index, values) {
+                return 'R$ ' + value;
+              }
+            }
+          }
+        }
+      }
+    });

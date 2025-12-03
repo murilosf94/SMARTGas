@@ -1,101 +1,92 @@
-// controllers/vendaCombustivelController.js
 const pool = require('../db');
 
-// --- [INÍCIO DA NOVA FUNÇÃO HELPER] ---
-/**
- * Verifica se uma promoção de combustível está ativa AGORA.
- * @param {object} combustivel - O objeto combustível vindo do banco.
- * @returns {boolean} - True se a promoção estiver ativa, false caso contrário.
- */
+// Mantive sua função de promoção, ela está correta
 function isPromocaoAtivaAgora(combustivel) {
-  // 1. Promoção está ligada?
   if (!combustivel.promo_ativo || !combustivel.promo_hora_inicio || !combustivel.promo_hora_fim || !combustivel.promo_dias_semana) {
-    return false; // Se faltar qualquer regra, não está ativa.
+    return false;
   }
-
-  // 2. O dia da semana bate?
   const agora = new Date();
-  const diaHoje = agora.getDay(); // Domingo=0, Segunda=1, etc.
-  const diasValidos = combustivel.promo_dias_semana.split(','); // Ex: ['1', '2', '3']
+  const diaHoje = agora.getDay();
+  const diasValidos = combustivel.promo_dias_semana.split(',');
   
   if (!diasValidos.includes(String(diaHoje))) {
-    return false; // Hoje não é um dia válido para a promoção.
+    return false;
   }
 
-  // 3. A hora bate? (Esta parte é chata em JS)
   const [horaInicio, minInicio] = combustivel.promo_hora_inicio.split(':').map(Number);
   const [horaFim, minFim] = combustivel.promo_hora_fim.split(':').map(Number);
   
   const dataInicio = new Date();
-  dataInicio.setHours(horaInicio, minInicio, 0, 0); // Ex: Hoje às 14:00:00
+  dataInicio.setHours(horaInicio, minInicio, 0, 0);
   
   const dataFim = new Date();
-  dataFim.setHours(horaFim, minFim, 0, 0); // Ex: Hoje às 16:00:00
+  dataFim.setHours(horaFim, minFim, 0, 0);
 
-  // Compara o 'agora' com o início e o fim
   if (agora >= dataInicio && agora <= dataFim) {
-    return true; // ESTAMOS NA HORA DO HAPPY HOUR!
+    return true;
   }
-
-  return false; // A hora já passou ou ainda não começou.
+  return false;
 }
-// --- [FIM DA NOVA FUNÇÃO HELPER] ---
 
-
-// MOSTRA A PÁGINA DE VENDA COM OS PREÇOS (NORMAIS OU PROMOCIONAIS)
 exports.mostrarTelaVenda = async (req, res, next) => {
   try {
-    const [combustiveis] = await pool.query("SELECT * FROM combustiveis");
+    // CORREÇÃO: Buscamos apenas da tabela 'combustiveis', sem JOIN com 'bombas'
+    const [rows] = await pool.query(
+      `SELECT * FROM combustiveis ORDER BY nome`
+    );
     
-    // Agora, para cada combustível, checamos se a promo está ativa
-    const combustiveisComPrecoCorreto = combustiveis.map(c => {
-      const emPromocao = isPromocaoAtivaAgora(c);
+    const combustiveisComPreco = rows.map(item => {
+      const emPromocao = isPromocaoAtivaAgora(item);
       
       return {
-        ...c,
-        estoqueBaixo: parseFloat(c.estoque_litros) <= parseFloat(c.estoque_minimo_litros),
-        
-        // --- [LÓGICA DO PREÇO] ---
-        // Se 'emPromocao' for true, o preço_vigente é o promocional
-        // Se for false, o preço_vigente é o normal
-        preco_vigente: emPromocao ? c.preco_promocional : c.preco_por_litro,
-        emPromocao: emPromocao // Passa a info para o Jade (para mostrar um aviso)
+        ...item,
+        estoqueBaixo: parseFloat(item.estoque_litros) <= parseFloat(item.estoque_minimo_litros),
+        preco_vigente: emPromocao ? item.preco_promocional : item.preco_por_litro,
+        emPromocao: emPromocao
       };
     });
     
-    res.render('venda-combustivel/index', { combustiveis: combustiveisComPrecoCorreto });
+    // Passamos a lista como 'combustiveis' para a view
+    res.render('venda-combustivel/index', { 
+      combustiveis: combustiveisComPreco,
+      titulo: 'Frente de Caixa - Combustível'
+    });
   } catch (err) {
     next(err);
   }
 };
 
-// PROCESSA A VENDA (COM O PREÇO CORRETO)
 exports.registrarVenda = async (req, res, next) => {
   try {
+    // CORREÇÃO: Recebemos 'combustivel_id' em vez de 'bomba_id'
     const { combustivel_id, valor_reais, valor_litros } = req.body;
     const { id: frentista_id } = req.session.usuario;
     const turno_id = req.session.turno_id;
 
-    // 1. Pega TODAS as regras do combustível no banco
+    // 1. Busca os dados do Combustível
     const [rows] = await pool.query(
-      "SELECT * FROM combustiveis WHERE id = ?",
+      `SELECT * FROM combustiveis WHERE id = ?`,
       [combustivel_id]
     );
     
     if (rows.length === 0) return res.status(404).send("Combustível não encontrado.");
+    
+    const item = rows[0];
+    const estoqueAtual = parseFloat(item.estoque_litros);
 
-    const combustivel = rows[0];
-    const estoqueAtual = parseFloat(combustivel.estoque_litros);
+    // Verifica bloqueio de manutenção
+    if (item.status_manutencao === 'manutencao_necessaria') { // ajuste conforme seu ENUM no banco, talvez seja 'alerta'
+       // Se quiser bloquear venda no alerta, mantenha. Se for só aviso, remova.
+    }
 
-    // 2. Calcula o preço (reutilizando a lógica)
-    const emPromocao = isPromocaoAtivaAgora(combustivel);
-    const precoLitro = parseFloat(emPromocao ? combustivel.preco_promocional : combustivel.preco_por_litro);
+    const emPromocao = isPromocaoAtivaAgora(item);
+    const precoLitro = parseFloat(emPromocao ? item.preco_promocional : item.preco_por_litro);
 
-    // 3. Lógica de conversão (que já tínhamos)
+    // 2. Cálculos de Valor e Litros
     let litrosVendidos = 0;
     let valorVenda = 0;
 
-    // (Corrigindo o bug da vírgula que fizemos antes)
+    // Lógica para calcular baseado no que foi preenchido
     if (valor_reais && parseFloat(valor_reais.replace(',', '.')) > 0) {
       valorVenda = parseFloat(valor_reais.replace(',', '.'));
       litrosVendidos = valorVenda / precoLitro;
@@ -103,20 +94,17 @@ exports.registrarVenda = async (req, res, next) => {
       litrosVendidos = parseFloat(valor_litros.replace(',', '.'));
       valorVenda = litrosVendidos * precoLitro;
     } else {
-      return res.status(400).send("Valor ou Litros inválidos.");
+      return res.status(400).send("Preencha o valor em Reais ou a quantidade de Litros.");
     }
 
-    // 4. Checa o estoque do TANQUE
+    // 3. Verifica Estoque
     if (estoqueAtual < litrosVendidos) {
       return res.status(400).send("Estoque insuficiente no tanque.");
     }
 
-    // --- [INÍCIO DAS NOVAS MUDANÇAS] ---
+    const novoTotalBombeado = parseFloat(item.total_litros_bombeados) + litrosVendidos;
 
-    // 5. Adiciona os litros ao "odômetro" do TANQUE
-    const novoTotalBombeado = parseFloat(combustivel.total_litros_bombeados) + litrosVendidos;
-
-    // 6. Deduz o estoque E atualiza o odômetro (em uma só query)
+    // 4. Atualiza o Combustível (Estoque e Odômetro)
     await pool.execute(
       `UPDATE combustiveis SET 
          estoque_litros = estoque_litros - ?,
@@ -125,36 +113,35 @@ exports.registrarVenda = async (req, res, next) => {
       [litrosVendidos, novoTotalBombeado, combustivel_id]
     );
 
-    // 7. REGISTRA A VENDA (já tínhamos isso)
+    // 5. Insere a Venda
+    // Removemos 'bomba_id' do INSERT pois a tabela não existe mais
     await pool.execute(
-      `INSERT INTO vendas (frentista_id, turno_id, combustivel_id, valor_venda, tipo_venda) 
-       VALUES (?, ?, ?, ?, 'combustivel')`,
-      [frentista_id, turno_id, combustivel_id, valorVenda]
+      `INSERT INTO vendas (frentista_id, turno_id, combustivel_id, valor_venda, tipo_venda, quantidade) 
+       VALUES (?, ?, ?, ?, 'combustivel', ?)`,
+      [frentista_id, turno_id, combustivel_id, valorVenda, litrosVendidos]
     );
     
-    // 8. *** O GATILHO (O "Quando...") ***
-    const limite = parseFloat(combustivel.limite_manutencao_litros);
-    const limiar = parseFloat(combustivel.limiar_alerta_percentual); // Ex: 0.95
+    // 6. Lógica de Manutenção (Agora baseada no combustível/tanque)
+    const limite = parseFloat(item.limite_manutencao_litros);
+    const limiar = parseFloat(item.limiar_alerta_percentual); // ex: 0.95
     
-    // Se o total passou do limite (ex: 9500L) E o status ainda era 'ok'...
-    if (novoTotalBombeado >= (limite * limiar) && combustivel.status_manutencao === 'ok') {
+    // Se atingiu o limite para alerta
+    if (novoTotalBombeado >= (limite * limiar) && item.status_manutencao === 'ok') {
       
-      // *** A AÇÃO (O "Então...") ***
-      
-      // a. Muda o status do combustível para 'alerta'
+      // Atualiza status do combustível
       await pool.execute(
         "UPDATE combustiveis SET status_manutencao = 'alerta' WHERE id = ?",
         [combustivel_id]
       );
       
-      // b. Cria a Ordem de Manutenção (o "Alerta")
+      // Cria ordem de manutenção
+      // CORREÇÃO: Usamos 'combustivel_id' na tabela ordens_manutencao
       await pool.execute(
         `INSERT INTO ordens_manutencao (combustivel_id, motivo) 
-         VALUES (?, 'Manutenção recomendada: Limite de litros (Troca de Filtro) atingido.')`,
+         VALUES (?, 'Manutenção preventiva: Limite de litros atingido.')`,
         [combustivel_id]
       );
     }
-    // --- [FIM DAS NOVAS MUDANÇAS] ---
     
     res.redirect('/venda-combustivel'); 
     

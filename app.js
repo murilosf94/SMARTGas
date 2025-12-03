@@ -29,10 +29,12 @@ const authRoutes     = require('./routes/authroute');
 var adminUsuariosRouter = require('./routes/adminUsuariosRoutes');
 const { estaLogado, eAdmin } = require('./middleware/authmiddleware');
 var productsRouter   = require('./routes/products');  // CRUD de produtos
-var turnoRouter = require('./routes/turnoRoutes'); // <-- 1. IMPORTE
-var combustiveisRouter = require('./routes/combustiveisRoutes'); // <-- 1. IMPORTE
-var vendaCombustivelRouter = require('./routes/vendaCombustivelRoutes'); // <-- 1. IMPORTE
-var manutencaoRouter = require('./routes/manutencaoRoutes'); // <-- 1. IMPORTE
+var turnoRouter = require('./routes/turnoRoutes');
+var combustiveisRouter = require('./routes/combustiveisRoutes');
+var vendaCombustivelRouter = require('./routes/vendaCombustivelRoutes');
+var manutencaoRouter = require('./routes/manutencaoRoutes');
+// --- [NOVO IMPORT] ---
+var relatorioRouter = require('./routes/relatorioRoutes'); 
 
 //const { estaLogado, eAdmin } = require('./middleware/authmiddleware');
 const { precisaDeTurnoAberto } = require('./middleware/turnoMiddleware');
@@ -106,9 +108,8 @@ app.use('/anunciar', estaLogado, precisaDeTurnoAberto, anunciarRouter);
 app.use('/perfil', estaLogado, meuperfilRouter);
 app.use('/despesas', estaLogado, precisaDeTurnoAberto, despesasRouter);
 app.use('/fornecedores', estaLogado, fornecedoresRouter);
-app.use('/venda-combustivel', estaLogado, precisaDeTurnoAberto, vendaCombustivelRouter); // <-- 2. USE
-//app.use('/clientes', estaLogado, clientesRouter);
-app.use('/combustiveis', estaLogado, combustiveisRouter); // <-- 2. USE
+app.use('/venda-combustivel', estaLogado, precisaDeTurnoAberto, vendaCombustivelRouter);
+app.use('/combustiveis', estaLogado, combustiveisRouter);
 
 
 // Rota admin
@@ -119,7 +120,11 @@ app.use('/dashboardadmin', estaLogado, eAdmin, dashboardadminRouter);
 
 app.use('/admin-usuarios', estaLogado, eAdmin, adminUsuariosRouter);
 
-app.use('/manutencao', manutencaoRouter); // <-- 2. USE (junto com rotas de admin)
+app.use('/manutencao', manutencaoRouter);
+
+// --- [NOVO USO DA ROTA] ---
+// Adicionada aqui junto com as outras rotas de admin
+app.use('/relatorios', estaLogado, eAdmin, relatorioRouter);
 
 
 // Exemplo de consulta direta usando pool
